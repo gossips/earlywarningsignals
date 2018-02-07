@@ -1,0 +1,7 @@
+# Scalable vector graphics #
+############################
+*.svg
+
+# Latex generated files #
+############################
+*.gz
