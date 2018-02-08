@@ -1,1 +1,19 @@
 # Outline EWS Toolbox Vasilis
+
+The toolbox of Vasilis consists of the following functions:
+    * BDSboot: bootstrapped version of bdstest_ews, I think
+    * bdstest_ews: detects nonlinear serial dependence in time series (http://www.early-warning-signals.org/time-series-methods/metric-based-indicators/bds-test/)
+    * ch_ews: to estimate changes in conditional heteroskedasticity within rolling windows along a timeseries
+    * data: NO IDEA WHAT THIS IS.
+    * ddjnonparam_ews: drift diffusion jump nonparametrics early warning signals. This function fits a general model that can approximate a wide range of nonlinear processes without the need to specify an explicit equation (see: http://www.early-warning-signals.org/time-series-methods/model-based-indicators/nonparametric-drift-diffusion-jump-models/)
+    * earlywarnings-internal: specifying the random seeds. Not sure how, as it seems very long. 
+    * find.maxima: function to find maxima 
+    * firstlib: function that gives the following start-up message: "earlywarnings Copyright (C) 2011-2015 Vasilis Dakos en Leo Lahti + site"
+    * generic_ews: to estimate statistical moments within rolling windows along a timeseries
+    * potential_ews: visualization of the potential function from the movpotential function + potential analysis for univariate data (one-dimensional potential estimation derived from a uni=variate timeseries) + detect optima, excluding very local optima below detection.threshold + function to reconstruct a potential derived from data along a gradient of a given parameter 
+    * qda_ews: quick detection analysis for generic EWS. Is used to estimate autocorrelation, variance within rolling windows along a timeseries, test the significance of their trends, and reconstruct the potential landscape of the timeseries
+    * sensitivity_ews: estimates trends in statistical moments fro different sizes of rolling windows along a timeseries. The trends are estimated by the nonparametric Kendall tau correlation coefficient.
+    * surrogates_ews: estimates distributions of trends in statistical moments from different surrogate timeseries generated after fitting an ARMA(p,q) model on the data. Trends estimated by Kendall tau and can be compared to the trends estimated in the original timeseries to produce probabilities of false positives.
+    * utils: get group assignment indices for univariate data points, given cluster break points
+
+Functions that are very similar in structure and content: generic_ews, qda_ews, sensitivity_ews, surrogates_ews. 
