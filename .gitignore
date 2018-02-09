@@ -5,3 +5,8 @@
 # Latex generated files #
 ############################
 *.gz
+
+# iPython notebook cache #
+############################
+__pycache__/
+code/.ipynb_checkpoints/
