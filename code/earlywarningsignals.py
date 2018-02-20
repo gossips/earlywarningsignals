@@ -1,12 +1,54 @@
 #!/bin/python3
 
 import scipy.stats
+import numpy as np
 
 ## Description of the collection of functions
 
 def check_time_series(input):
     ## Dummy function.
     return 'Hello world!'
+
+def logtransform(ts):
+    
+    """Compute the logtransform of the original timeseries
+    
+    :param ts: original timeseries with variables in rows
+    :return: logtransform of ts 
+
+    
+    Created by Ingrid van de Leemput
+    """
+    ts_log = np.log(ts+1)
+    return ts_log
+
+def apply_rolling_window(ts,winsize=50):
+    
+    """Re-arrange time series for rolling window
+    
+    :param ts: original timeseries (one-dimensional!!)
+    :param winsize:  the size of the rolling window expressed as percentage of the timeseries length (must be numeric between 0 and 100). Default is 50\%.
+    :return: matrix of different windows
+
+    !! This function can only handle one-dimensional timeseries, and we don't check for that (yet)
+    Created by Ingrid van de Leemput
+    """
+    
+    # WE SHOULD CHECK HERE THAT ts is one-dimensional.. 
+    
+    mw=round(ts.size * winsize/100) # length moving window
+    omw=ts.size-mw+1 # number of moving windows
+    nMR = np.empty(shape=(omw,mw))
+    nMR[:] = np.nan
+    
+    #not needed in this function: 
+    low=2 
+    high=mw 
+    x = range(1,mw) 
+    
+    for i in range(0,omw):
+        nMR[i,:]=ts[i:i+mw]  
+    return nMR
 
 def kendalltau(indicatorvec):
     ## Kendall trend statistic
