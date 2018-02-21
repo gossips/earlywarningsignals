@@ -22,6 +22,45 @@ def logtransform(ts):
     ts_log = np.log(ts+1)
     return ts_log
 
+def EWS(timeseries,autocorrelation=False,variance=False,skewness=False):
+    
+    """Function that calculates early warning signals
+    
+    :param timeseries: Original timeseries (first column time indixes, other 
+    columns time series for different variables)
+    :param autocorrelation: Set to True if autocorrelation is required in output
+    :param variance: Set to True if variance is required in output
+    :param skewness: Set to True if skewness is required in output
+    :return: dict with the chosen output and for every output an array with the   
+    values for each variable (every column).
+    
+    """
+    
+    nr_vars=len(timeseries[0,:])-1
+    result={}
+    
+    if autocorrelation == True:
+        AC=[0]*nr_vars
+        for i in range(nr_vars):
+            AC[i]=np.corrcoef(timeseries[1:,i+1],timeseries[:-1,i+1])[1,0]
+            result.update({'autocorrelation' : AC})
+            
+    if variance == True:
+        Var=[0]*nr_vars
+        for i in range(nr_vars):
+            Var[i]=np.var(timeseries[:,i+1])
+            result.update({'variance' : Var})
+            
+    if skewness == True:
+        Skews=[0]*nr_vars
+        for i in range(nr_vars):
+            Skews[i]=scipy.stats.skew(timeseries[:,i+1])
+            result.update({'skewness' : Skews})
+            
+        
+        
+    return result
+
 def apply_rolling_window(ts,winsize=50):
     
     """Re-arrange time series for rolling window
