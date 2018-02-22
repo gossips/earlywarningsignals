@@ -25,6 +25,7 @@ def interpolate(x, y, new_x = None, dim = 1, method = 'linear', spline = False, 
         spline: Spline interpolation. Can be True or False. If True then the function ignores the method call. Default is False. 
         k: Degree of the smoothing spline. Must be <= 5. Default is k=3, a cubic spline. 
         der: The order of derivative of the spline to compute (must be less than or equal to k)
+    Created by M Usman Mirza
     """
     if dim == 1 & spline == False:
         f = interp1d(x = x, y = y, kind = method)
