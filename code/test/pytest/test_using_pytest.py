@@ -1,4 +1,5 @@
 from pytest import approx
+import numpy as np
 
 def test_dummy_pass():
     assert True
