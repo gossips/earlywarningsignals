@@ -2,6 +2,7 @@
 
 import scipy.stats
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 
 ## Description of the collection of functions
 
@@ -21,6 +22,75 @@ def logtransform(ts):
     """
     ts_log = np.log(ts+1)
     return ts_log
+
+def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree=None):
+    
+    """Detrend time series.
+    
+    :param timeseries: array with time indices in the first column and time series values in the second.
+    :param detrending: either
+        'gaussian' = Gaussian detrending
+        'linear' = linear regression
+        'loess' = local nonlinear regression
+        'first_diff' = first-difference filtering
+        'no' = no detrending
+    :param bandwidth: bandwidth for Gaussian detrending. If None, chooses default bandwidth (using Silverman's rule of thumb).
+    :param span: window size in case of loess, in percentage of time series length. If None, chooses default span (25%).
+    :param degree: degree of polynomial in case of loess. If None, chooses default degree of 2.
+    :return: trend and residuals. In case of first_diff, returns residuals and difference between consecutive time values.
+    
+    Created by Arie Staal
+    """
+    
+    ts = timeseries[:,1]
+    time_index = timeseries[:,0]
+    
+    if detrending == 'gaussian':
+        
+        if bandwidth == None:
+            # Silverman's rule of thumb
+            bw = 0.9 * min(np.std(ts), (np.percentile(ts, 75) - np.percentile(ts, 25)) / 1.34) * len(ts)**(-0.2)
+        else:
+            bw = round(len(ts) * bandwidth/100)
+            
+        trend = gaussian_filter1d(ts, bw, axis=0) # smY in R code
+        resid = ts - trend                        # nsmY in R code
+        
+    elif detrending == 'linear': 
+        
+        x = np.linspace(0, len(ts), len(ts))
+        slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,ts)
+        trend = intercept + slope * x
+        resid = ts - trend
+        
+    elif detrending == 'loess':
+        
+        if span == None:
+            span = 25/100
+        else:
+            span = span/100
+            
+        if degree == None:
+            degree = 2
+        else:
+            degree = degree
+            
+        # Here include code for local nonlinear regression
+        
+    elif detrending == 'first_diff':
+        
+        resid = np.diff(ts, n=1, axis=0)
+        time_index_diff = time_index[0:(len(time_index) - 1)]
+        
+    elif detrending == 'no':
+        
+        trend = ts
+        resid = ts
+        
+    if detrending == 'first_diff':
+        return resid, time_index_diff
+    else:
+        return trend, resid
 
 def EWS(timeseries,autocorrelation=False,variance=False,skewness=False):
     
