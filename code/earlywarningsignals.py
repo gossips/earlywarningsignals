@@ -92,42 +92,55 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
     else:
         return trend, resid
 
-def EWS(timeseries,autocorrelation=False,variance=False,skewness=False):
+def EWS(timeseries,autocorrelation=False,variance=False,skewness=False,
+        kurtosis=False, CV=False):
     
     """Function that calculates early warning signals
     
-    :param timeseries: Original timeseries (first column time indixes, other 
-    columns time series for different variables)
+    :param timeseries: Original timeseries (column for every variable)
     :param autocorrelation: Set to True if autocorrelation is required in output
     :param variance: Set to True if variance is required in output
     :param skewness: Set to True if skewness is required in output
+    :param kurtosis: Set to True if kurtosis is required (Fishers definition used, 
+    so it is zero for a normal distribution)
+    :param CV: Set to True if coefficient of variation is required
     :return: dict with the chosen output and for every output an array with the   
     values for each variable (every column).
     
     """
     
-    nr_vars=len(timeseries[0,:])-1
+    nr_vars=len(timeseries[0,:])
     result={}
     
     if autocorrelation == True:
         AC=[0]*nr_vars
         for i in range(nr_vars):
-            AC[i]=np.corrcoef(timeseries[1:,i+1],timeseries[:-1,i+1])[1,0]
+            AC[i]=np.corrcoef(timeseries[1:,i],timeseries[:-1,i])[1,0]
             result.update({'autocorrelation' : AC})
             
     if variance == True:
         Var=[0]*nr_vars
         for i in range(nr_vars):
-            Var[i]=np.var(timeseries[:,i+1])
+            Var[i]=np.var(timeseries[:,i])
             result.update({'variance' : Var})
             
     if skewness == True:
         Skews=[0]*nr_vars
         for i in range(nr_vars):
-            Skews[i]=scipy.stats.skew(timeseries[:,i+1])
+            Skews[i]=scipy.stats.skew(timeseries[:,i])
             result.update({'skewness' : Skews})
             
-        
+    if kurtosis == True:
+        Kurt=[0]*nr_vars
+        for i in range(nr_vars):
+            Kurt[i]=scipy.stats.kurtosis(timeseries[:,i])
+            result.update({'kurtosis' : Kurt})
+
+    if CV == True:
+        CVs=[0]*nr_vars
+        for i in range(nr_vars):
+            CVs[i]=np.std(timeseries[:,i])/np.mean(timeseries[:,i])
+            result.update({'CV' : CVs})        
         
     return result
 
