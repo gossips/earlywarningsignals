@@ -107,6 +107,8 @@ def EWS(timeseries,autocorrelation=False,variance=False,skewness=False,
     :return: dict with the chosen output and for every output an array with the   
     values for each variable (every column).
     
+    one loop
+    
     """
     
     nr_vars=len(timeseries[0,:])
