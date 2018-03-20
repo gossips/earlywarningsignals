@@ -11,18 +11,19 @@ def check_time_series(input):
     ## Dummy function.
     return 'Hello world!'
 
-def logtransform(ts):
+def logtransform(df):
     
     """Compute the logtransform of the original timeseries
     
-    :param ts: original timeseries with variables in rows
-    :return: logtransform of ts 
+    :param df: dataframe with original timeseries 
+    :return: new dataframe with logtransformed timeseries 
 
     
     Created by Ingrid van de Leemput
     """
-    ts_log = np.log(ts+1)
-    return ts_log
+    df=df+1
+    df_log=df.apply(np.log)
+    return df_log
 
 def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree=None):
     
@@ -149,33 +150,21 @@ def EWS(ts,autocorrelation=False,variance=False,skewness=False,
         
     return result
 
-def apply_rolling_window(ts,winsize=50):
+def EWS_rolling_window(df,winsize=50):
     
-    """Re-arrange time series for rolling window
+    """Use a rolling window on which EWS are calculated
     
-    :param ts: original timeseries (one-dimensional!!)
+    :param df: dataframe with original timeseries 
     :param winsize:  the size of the rolling window expressed as percentage of the timeseries length (must be numeric between 0 and 100). Default is 50\%.
-    :return: matrix of different windows
+    :return: dataframe with result
 
-    !! This function can only handle one-dimensional timeseries, and we don't check for that (yet)
     Created by Ingrid van de Leemput
     """
     
-    # WE SHOULD CHECK HERE THAT ts is one-dimensional.. 
+    mw=round(len(df.index) * winsize/100) # length moving window
+    df.rolling(window=mw).apply(func=EWS)
     
-    mw=round(ts.size * winsize/100) # length moving window
-    omw=ts.size-mw+1 # number of moving windows
-    nMR = np.empty(shape=(omw,mw))
-    nMR[:] = np.nan
-    
-    #not needed in this function: 
-    low=2 
-    high=mw 
-    x = range(1,mw) 
-    
-    for i in range(0,omw):
-        nMR[i,:]=ts[i:i+mw]  
-    return nMR
+    #How to do this nicely? I think we should plug this into the EWS function!
 
 def kendalltau(indicatorvec):
     ## Kendall trend statistic
