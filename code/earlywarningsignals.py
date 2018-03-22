@@ -14,8 +14,8 @@ def check_time_series(data, timeindex=None):
     ## Dummy function.
         """Check if the timeseries are in the suitable format (pd DataFrame with only numeric values).
     
-    :param timeindex: the timeindex of the data
-    :param data: the data, can be univariate or multivariate
+    :param timeindex: the timeindex of the data as an array
+    :param data: the data, can be univariate or multivariate, as Pandas DataFrame
     
     """ 
     timeseries = pd.DataFrame(data=data)
