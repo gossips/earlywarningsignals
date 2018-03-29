@@ -9,7 +9,9 @@ import pandas as pd
 
 def checkSpacing(iterator):
     iterator=np.asarray(iterator)
-    return len(set(iterator)) <= 1 #set builds an unordered collection of unique elements.
+    iterator=iterator.transpose()
+    spaced  = iterator[1:]-iterator[0:-1]
+    return len(set(spaced)) <= 1 #set builds an unordered collection of unique elements.
 
 def check_time_series(data, timeindex=None):
     ## Dummy function.
@@ -19,22 +21,19 @@ def check_time_series(data, timeindex=None):
     :param data: the data, can be univariate or multivariate, as Pandas DataFrame
     
     """ 
-    timeseries = pd.DataFrame(data=data)
+    if isinstance(data, np.ndarray):
+        timeseries = pd.DataFrame(data=data)
     if timeindex is None:
-        timeindex = np.linspace(0,timeseries.shape[0]-1, timeseries.shape[0])
+        timeindex = pd.DataFrame(data=np.arange(timeseries.shape[0])) #np.linspace(0,timeseries.shape[0]-1, timeseries.shape[0])
+    elif isinstance(timeindex,np.ndarray):
+        timeindex = pd.DataFrame(data=timeindex)
+    evenly = checkSpacing(timeindex)
+    if evenly == False:
+        print("time index is not evenly spaced.")
+    if timeseries.shape[0] == timeindex.shape[0]:
+        print("right format for analysis")
     else:
-        if isinstance(timeindex, np.ndarray):
-            timeindex = pd.DataFrame(timeindex, columns=['Time'])
-        if isinstance(timeindex, pd.DataFrame):
-            timeindex = np.asarray(timeindex)
-            spaced = timeindex[1:]-timeindex[0:-1]
-            evenly = checkSpacing(spaced)
-            if evenly == False:
-                print("time index is not evenly spaced.")
-        if timeseries.shape[0] == timeindex.shape[0]:
-            print("right format for analysis")
-        else:
-            print("timeindex and data do not have the same length")
+        print("timeindex and data do not have the same length")
     return timeseries, timeindex
 
 def logtransform(df):

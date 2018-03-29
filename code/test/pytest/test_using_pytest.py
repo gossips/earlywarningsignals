@@ -1,5 +1,6 @@
 from pytest import approx
 import numpy as np
+import pandas as pd
 
 def test_dummy_pass():
     assert True
@@ -46,3 +47,41 @@ def test_EWS():
     assert(result['skewness'] == output_skewness)
     assert(result['kurtosis'] == output_kurtosis)
     assert(result['CV'] == output_CV)
+    
+def test_spaced():
+    from earlywarningsinals import CheckSpacing
+    
+    # Test 1: Trying a known value
+    input_1 = np.arange(10)
+    input_2 = np.random.randint(low=0, high=10, size=(10,1))
+    spaced_1 = input_1[1:]-input_1[0:-1]
+    spaced_2 =  input_2[1:]-input_2[0:-1]
+    output_1= True
+    output_2= False
+    
+    assert(CheckSpacing(spaced_1) == output_1)
+    assert(CheckSpacing(spaced_2) == output_2)
+    
+def test_timeseries():
+    from earlywarningsinals import check_time_series, CheckSpacing
+    from pandas.util.testing import assert_frame_equal
+    
+    # Test 1: Trying a known value
+    input_1a = np.arange(10)*2
+    input_1b = np.arange(10)
+    input_2a = np.array([[1,6],[3,5],[4,4],[6,1]])
+    input_2b = np.arange(4)
+    input_3a = pd.DataFrame(input_1a)
+    input_3b = pd.DataFrame(input_1b)
+    input_4a = pd.DataFrame(input_2a)
+    input_4b = pd.DataFrame(input_2b)
+    
+    #still have to write asserts
+    
+    
+    
+    
+    
+    
+    
+    
