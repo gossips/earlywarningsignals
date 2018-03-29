@@ -1,4 +1,4 @@
-from pytest import approx
+from pytest import approx, raises
 import numpy as np
 import pandas as pd
 
@@ -49,7 +49,7 @@ def test_EWS():
     assert(result['CV'] == output_CV)
     
 def test_spaced():
-    from earlywarningsinals import CheckSpacing
+    from earlywarningsignals import CheckSpacing
     
     # Test 1: Trying a known value
     input_1 = np.arange(10)
@@ -63,20 +63,30 @@ def test_spaced():
     assert(CheckSpacing(spaced_2) == output_2)
     
 def test_timeseries():
-    from earlywarningsinals import check_time_series, CheckSpacing
-    from pandas.util.testing import assert_frame_equal
+    from earlywarningsignals import check_time_series
     
     # Test 1: Trying a known value
     input_1a = np.arange(10)*2
     input_1b = np.arange(10)
     input_2a = np.array([[1,6],[3,5],[4,4],[6,1]])
+    input_2aa = np.array([['a','b'],['b','x'],['l','i'],['g','z']])
     input_2b = np.arange(4)
+    input_2bb = np.random.randint(low=0, high=14, size=(4,1))
     input_3a = pd.DataFrame(input_1a)
     input_3b = pd.DataFrame(input_1b)
     input_4a = pd.DataFrame(input_2a)
     input_4b = pd.DataFrame(input_2b)
-    
+    [output_1a, output_1b] = check_time_series(input_1a)
     #still have to write asserts
+    assert(isinstance(output_1a, pd.DataFrame))
+    
+    #check if evenly spaced check works
+    with raises(ValueError):
+        check_time_series(input_2a, input_2bb)
+        
+    #check if check if timeseries and timeindex have same length works
+    with raises(ValueError):
+        check_time_series(input_3a, input_4b)
     
     
     

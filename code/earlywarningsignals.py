@@ -14,7 +14,7 @@ def checkSpacing(iterator):
 
 def check_time_series(data, timeindex=None):
     ## Dummy function.
-    """Check if the timeseries are in the suitable format (pd DataFrame with only numeric values).
+    """Check if the timeseries are in the suitable format (pd DataFrame with only numeric values). Function also works for non-numeric data, because I did not check for that. 
     
     :param timeindex: the timeindex of the data
     :param data: the data, can be univariate or multivariate, as Pandas DataFrame
