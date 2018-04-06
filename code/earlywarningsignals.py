@@ -4,6 +4,7 @@ import scipy.stats
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 import pandas as pd
+from scipy import interpolate
 
 ## Description of the collection of functions
 
@@ -61,7 +62,6 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
         'linear' = linear regression
         'loess' = local nonlinear regression
         'first_diff' = first-difference filtering
-        'no' = no detrending
     :param bandwidth: bandwidth for Gaussian detrending. If None, chooses default bandwidth (using Silverman's rule of thumb).
     :param span: window size in case of loess, in percentage of time series length. If None, chooses default span (25%).
     :param degree: degree of polynomial in case of loess. If None, chooses default degree of 2.
@@ -103,22 +103,67 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
         else:
             degree = degree
             
-        # Here include code for local nonlinear regression
+        trend = loess(time_index, ts, degree, span)
+        resid = ts - trend
         
     elif detrending == 'first_diff':
         
         resid = np.diff(ts, n=1, axis=0)
         time_index_diff = time_index[0:(len(time_index) - 1)]
         
-    elif detrending == 'no':
-        
-        trend = ts
-        resid = ts
-        
     if detrending == 'first_diff':
         return resid, time_index_diff
     else:
         return trend, resid
+
+def loess(x, y, degree, span):
+    
+    """Local polynomial regression.
+    
+    Uses weighting of data points after R function loess. 
+    
+    :param x: times series indices.
+    :param y: time series.
+    :param degree: degree of polynomial.
+    :param span: window size in fraction of time series length.
+    :return: trend.
+    
+    Created by Arie Staal
+    """
+    
+    no_points = int(np.round(span*len(y)))
+    half_no_points = int(np.round(0.5*span*len(y)))
+    
+    maxdist = 0.5*span*len(y)
+    
+    p = np.empty(np.shape(y))
+    
+    for i in range(0,len(y)):
+        
+        if i < half_no_points:
+            x_span = x[0:no_points]
+            y_span = y[0:no_points]
+        
+        if (i >= half_no_points) & (i <= len(y) - half_no_points):
+            x_span = x[i - half_no_points : i + half_no_points]
+            y_span = y[i - half_no_points : i + half_no_points]
+            
+        if i > (len(y) - half_no_points):
+            x_span = x[len(y)-no_points+1:]
+            y_span = y[len(y)-no_points+1:]
+        
+        wi = np.empty(np.shape(y_span))
+        
+        cnt = 0
+        for x_i in x_span:
+            dist = np.absolute(x[i] - x_i) / (np.max(x) - np.min(x))
+            w_i[cnt] = (1 - (dist/maxdist)**3)**3
+            cnt = cnt + 1
+            
+        fit = np.poly1d(np.polyfit(x_span, y_span, deg=degree, w=w_i))
+        p[i] = fit(i)
+        
+    return p
 
 def EWS(ts,autocorrelation=False,variance=False,skewness=False,
         kurtosis=False, CV=False):
@@ -229,37 +274,31 @@ print('\nKtRETURNRATE (Tau,p_value): %.4f, %.4f' % (KtRETURNRATE[0],KtRETURNRATE
 print('\nKtCV (Tau,p_value): %.4f, %.4f' % (KtCV[0],KtCV[1]))
 
 #Interpolation function
-def interpolate(x, y, new_x = None, dim = 1, method = 'linear', spline = False, k = 3, s = 0, der = 0):
+def interp(x, y, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0):
     """
-    Function interpolates data with in one or two dimension. Returns interpolated data.
-    x: Original data point coordinates or time in case of time series. If dim = 2 then it should be a 2-dim array/float/tuple. Required value.
-    y: Original data values. Must be the same dimension as x. If dim = 2 then it should a 2-dim array/float/tuple. Required value.
-    new_x: Points at which to interpolate data. For 2-dim it should a grid. Required value.
-    dim: Specifies dimension of data. Currently only for 1 or 2 dimensions. Default is 1
-    method: Specifies interpolation method used. One of
-    	‘nearest’: return the value at the data point closest to the point of interpolation.
-        'linear’: interpolates linearly between data points on new data points
-        'cubic’: Interpolated values determined from a cubic spline
-        Default is ‘linear’
-    spline: Spline interpolation. Can be True or False. If True then the function ignores the method call. Default is False. 
-    k: Degree of the smoothing spline. Must be <= 5. Default is k=3, a cubic spline. 
-    der: The order of derivative of the spline to compute (must be less than or equal to k)
-    Created by M Usman Mirza
+    .. function:: interp(x, y, new_x, dim, method, spline, k, s, der)
+        Function interpolates timeseries with different methods. 
+        :param x: time index. In case of dataframe use df.iloc to refer the correct column. Required value.
+        :param y: Original data values. Must be the same lenght as x. In case of dataframe use df.iloc to refer the correct column. Required value.
+        :param new_x: Index values at which to interpolate data. Required value.
+        :param method: Specifies interpolation method used. One of
+            'nearest': return the value at the data point closest to the point of interpolation.
+            'linear': interpolates linearly between data points on new data points
+            'quadratic': Interpolated values determined from a quadratic spline
+            'cubic': Interpolated values determined from a cubic spline
+            Default is 'linear'
+        :param spline: Spline interpolation. Can be True or False. If True then the function ignores the method call. Default is False. 
+        :param k: Degree of the spline fit. Must be <= 5. Default is k=3, a cubic spline. 
+        :param s: Smoothing value. Default is 0. A rule of thumb can be s = m - sqrt(m) where m is the number of data-points being fit.
+        :param der: The order of derivative of the spline to compute (must be less than or equal to k)
+        :rtype: array of interpolated values 
+        Created by M Usman Mirza
     """
-    if dim == 1 & spline == False:
-        f = interp1d(x = x, y = y, kind = method)
+    if spline == False:
+        f = interpolate.interp1d(x = x, y = y, kind = method)
         i = f(new_x)
         return i
-    elif dim == 2 & spline == False:
-        i = griddata(points = x, values = y, xi = new_x, method = method)
+    elif spline == True:
+        f = interpolate.splrep(x = x, y = y, k = k, s = s)
+        i = interpolate.splev(x = new_x, tck = f, der = der)
         return i
-    elif dim == 1 & spline == True:
-        f = splrep(x = x, y = y, k = k, s = s)
-        i = splev(x = new_x, tck = f, der = der)
-        return i
-    elif dim == 2 & spline == True:
-        f = bisplrep(x = x[:,0], y = x[:,1], z = y, k = k, s = s)
-        i = bisplev(x = new_x[:,0], y = new_x[0,:], tck = f)
-        return i
-    else:
-        print('Dimension > 2 not supported')
