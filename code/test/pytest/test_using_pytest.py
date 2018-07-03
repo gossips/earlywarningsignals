@@ -15,7 +15,7 @@ def test_logtransform():
     # Test 1. Trying a known value
     
     # Input and expected output
-    x_in = 0.0
+    x_in = pd.DataFrame(data=[0])
     y_expected = 0.0
     
     # Check it
@@ -24,7 +24,7 @@ def test_logtransform():
     # Test 2. Trying a known value
     
     # Input and expected output
-    x_in = 1.0    
+    x_in = pd.DataFrame(data=[1.0]) 
     y_expected = 0.69314718055994529
     
     # Check it
