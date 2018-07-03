@@ -172,12 +172,13 @@ def loess(x, y, degree, span):
         
     return p
 
-def EWS(ts,autocorrelation=False,variance=False,skewness=False,
+def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
         kurtosis=False, CV=False):
       
     """Function that calculates early warning signals
     
     :param timeseries: Original timeseries (column for every variable)
+    :param window_size: Set to size of rolling window, default setting does not use a rolling window
     :param autocorrelation: Set to True if autocorrelation is required in output
     :param variance: Set to True if variance is required in output
     :param skewness: Set to True if skewness is required in output
@@ -193,38 +194,47 @@ def EWS(ts,autocorrelation=False,variance=False,skewness=False,
     
     result={}
     
-    if autocorrelation == True:
-        AC=[0]*nr_vars
-    if variance == True:
-        Var=[0]*nr_vars
-    if skewness == True:
-        Skews=[0]*nr_vars
-    if kurtosis == True:
-        Kurt=[0]*nr_vars
-    if CV == True:
-        CVs=[0]*nr_vars
+    if window_size == None:
+        libs = 1
+        window_size = len(timeseries[:,0])
+    else:
+        libs = len(timeseries[:,0]) - window_size + 1
     
-    for i in range(nr_vars):
+    if autocorrelation == True:
+        AC=np.zeros((libs,nr_vars))
+    if variance == True:
+        Var=np.zeros((libs,nr_vars))
+    if skewness == True:
+        Skews=np.zeros((libs,nr_vars))
+    if kurtosis == True:
+        Kurt=np.zeros((libs,nr_vars))
+    if CV == True:
+        CVs=np.zeros((libs,nr_vars))
+    
+    for j in range(libs):
+        lib_ts=timeseries[j:j+window_size,:]
         
-        if autocorrelation == True:
-            AC[i]=np.corrcoef(timeseries[1:,i],timeseries[:-1,i])[1,0]
-            result.update({'autocorrelation' : AC})            
-
-        if variance == True:
-            Var[i]=np.var(timeseries[:,i])
-            result.update({'variance' : Var})            
-
-        if skewness == True:
-            Skews[i]=scipy.stats.skew(timeseries[:,i])
-            result.update({'skewness' : Skews})            
-
-        if kurtosis == True:
-            Kurt[i]=scipy.stats.kurtosis(timeseries[:,i])
-            result.update({'kurtosis' : Kurt})
-
-        if CV == True:
-            CVs[i]=np.std(timeseries[:,i])/np.mean(timeseries[:,i])
-            result.update({'CV' : CVs})        
+        for i in range(nr_vars):
+            
+            if autocorrelation == True:
+                AC[j,i]=np.corrcoef(lib_ts[1:,i],lib_ts[:-1,i])[1,0]
+                result.update({'autocorrelation' : AC})            
+    
+            if variance == True:
+                Var[j,i]=np.var(lib_ts[:,i])
+                result.update({'variance' : Var})            
+    
+            if skewness == True:
+                Skews[j,i]=scipy.stats.skew(lib_ts[:,i])
+                result.update({'skewness' : Skews})            
+    
+            if kurtosis == True:
+                Kurt[j,i]=scipy.stats.kurtosis(lib_ts[:,i])
+                result.update({'kurtosis' : Kurt})
+    
+            if CV == True:
+                CVs[j,i]=np.std(lib_ts[:,i])/np.mean(lib_ts[:,i])
+                result.update({'CV' : CVs})        
         
     return result
 
