@@ -11,7 +11,7 @@ import numpy as np
 
 df = pd.DataFrame(np.random.randint(low=0, high=10, size=(7, 5)), columns=['a', 'b', 'c', 'd', 'e'])
 
-earlywarningsignals.check_time_series(df) 
+earlywarningsignals.check_time_series(df) #ok
 earlywarningsignals.logtransform(df) #ok
 earlywarningsignals.detrend(df)
 earlywarningsignals.EWS(df,autocorrelation=True) #ok

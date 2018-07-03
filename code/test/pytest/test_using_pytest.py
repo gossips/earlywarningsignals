@@ -34,7 +34,8 @@ def test_EWS():
     from earlywarningsignals import EWS
     
     # Test 1. Trying a known value
-    input_ts=np.array([[1,6],[3,5],[4,4],[6,1]])
+    np_input_ts=np.array([[1,6],[3,5],[4,4],[6,1]])
+    input_ts=pd.DataFrame(data=np_input_ts)
     output_autocorrelation=[0.92857142857142838, 0.96076892283052284]
     output_variance=[3.25, 3.5]
     output_skewness=[0.0, -0.6872431934890912]
