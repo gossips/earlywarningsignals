@@ -16,19 +16,21 @@ def test_logtransform():
     
     # Input and expected output
     x_in = pd.DataFrame(data=[0])
-    y_expected = 0.0
+    y_computed = logtransform(x_in)
+    y_expected = pd.DataFrame(data=[0.0])
     
     # Check it
-    assert (logtransform(x_in) == y_expected)
+    assert (y_computed.equals(y_expected))
     
     # Test 2. Trying a known value
     
     # Input and expected output
     x_in = pd.DataFrame(data=[1.0]) 
-    y_expected = 0.69314718055994529
+    y_computed = logtransform(x_in)
+    y_expected = pd.DataFrame(data=[0.69314718055994529])
     
     # Check it
-    assert (logtransform(x_in) == y_expected)
+    assert (y_computed.equals(y_expected))
     
 def test_EWS():
     from earlywarningsignals import EWS
