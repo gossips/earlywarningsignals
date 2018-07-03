@@ -55,15 +55,14 @@ def test_spaced():
     from earlywarningsignals import checkSpacing
     
     # Test 1: Trying a known value
-    input_1 = np.reshape(np.arange(10),(10,1))
-    input_2 = np.random.randint(low=0, high=10, size=(10,1))
-    spaced_1 = input_1[1:]-input_1[0:-1]
-    spaced_2 =  input_2[1:]-input_2[0:-1]
+    input_1 = np.arange(10)
+    input_2 = np.arange(10)
+    input_2[3]=9
     output_1= True
     output_2= False
     
-    assert(checkSpacing(spaced_1) == output_1)
-    assert(checkSpacing(spaced_2) == output_2)
+    assert(checkSpacing(input_1) == output_1)
+    assert(checkSpacing(input_2) == output_2)
     
 def test_timeseries():
     from earlywarningsignals import check_time_series

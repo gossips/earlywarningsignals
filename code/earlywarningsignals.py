@@ -11,6 +11,7 @@ from scipy import interpolate
 def checkSpacing(iterator):
     iterator=np.asarray(iterator)
     spaced  = iterator[1:]-iterator[0:-1]
+    spaced = np.reshape(spaced,(spaced.shape[0],1)) #reshape such that input for set is correct   
     return len(set(spaced[:,0])) <= 1 #set builds an unordered collection of unique elements.
 
 def check_time_series(data, timeindex=None):
@@ -24,19 +25,25 @@ def check_time_series(data, timeindex=None):
     if isinstance(data, np.ndarray):
         timeseries = pd.DataFrame(data=data)
     elif isinstance(data, pd.DataFrame):
-        timeseries= data
-    if timeindex is None:
-        timeindex = pd.DataFrame(data=np.arange(timeseries.shape[0])) #np.linspace(0,timeseries.shape[0]-1, timeseries.shape[0])
-    elif isinstance(timeindex,np.ndarray):
-        timeindex = pd.DataFrame(data=timeindex)
-    evenly = checkSpacing(timeindex)
-    if evenly == False:
-        raise ValueError("time index is not evenly spaced.")
-    if timeseries.shape[0] == timeindex.shape[0]:
-        print("right format for analysis")
+        timeseries = data
     else:
-        raise ValueError("timeindex and data do not have the same length")
-    return timeseries, timeindex
+        raise ValueError("data should be numpy array or a pandas dataframe")
+    
+    if (timeindex is not None) and (isinstance(timeindex,np.ndarray)):    
+        evenly = checkSpacing(timeindex)
+        
+        if evenly == False:
+            raise ValueError("time index is not evenly spaced.")
+            
+        if timeseries.shape[0] == timeindex.shape[0]:
+            print("right format for analysis")
+            timeseries.setindex(timeindex)
+        else:
+            raise ValueError("timeindex and data do not have the same length")
+    elif timeindex is not None:
+        raise ValueError("timeindex should be numpy array")   
+            
+    return timeseries
 
 def logtransform(df):
     
