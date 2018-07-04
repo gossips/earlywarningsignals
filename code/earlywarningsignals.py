@@ -10,40 +10,33 @@ from scipy import interpolate
 
 def checkSpacing(iterator):
     iterator=np.asarray(iterator)
-    spaced  = iterator[1:]-iterator[0:-1]
-    spaced = np.reshape(spaced,(spaced.shape[0],1)) #reshape such that input for set is correct   
-    return len(set(spaced[:,0])) <= 1 #set builds an unordered collection of unique elements.
+    return len(set(iterator)) <= 1 #set builds an unordered collection of unique elements.
 
 def check_time_series(data, timeindex=None):
     ## Dummy function.
-    """Check if the timeseries are in the suitable format (pd DataFrame with only numeric values). Function also works for non-numeric data, because I did not check for that. 
+    """Check if the timeseries are in the suitable format (pd DataFrame with only numeric values).
     
     :param timeindex: the timeindex of the data
     :param data: the data, can be univariate or multivariate, as Pandas DataFrame
     
     """ 
-    if isinstance(data, np.ndarray):
-        timeseries = pd.DataFrame(data=data)
-    elif isinstance(data, pd.DataFrame):
-        timeseries = data
+    timeseries = pd.DataFrame(data=data)
+    if timeindex is None:
+        timeindex = np.linspace(0,timeseries.shape[0]-1, timeseries.shape[0])
     else:
-        raise ValueError("data should be numpy array or a pandas dataframe")
-    
-    if (timeindex is not None) and (isinstance(timeindex,np.ndarray)):    
-        evenly = checkSpacing(timeindex)
-        
-        if evenly == False:
-            raise ValueError("time index is not evenly spaced.")
-            
+        if isinstance(timeindex, np.ndarray):
+            timeindex = pd.DataFrame(timeindex, columns=['Time'])
+        if isinstance(timeindex, pd.DataFrame):
+            timeindex = np.asarray(timeindex)
+            spaced = timeindex[1:]-timeindex[0:-1]
+            evenly = checkSpacing(spaced)
+            if evenly == False:
+                print("time index is not evenly spaced.")
         if timeseries.shape[0] == timeindex.shape[0]:
             print("right format for analysis")
-            timeseries.setindex(timeindex)
         else:
-            raise ValueError("timeindex and data do not have the same length")
-    elif timeindex is not None:
-        raise ValueError("timeindex should be numpy array")   
-            
-    return timeseries
+            print("timeindex and data do not have the same length")
+    return timeseries, timeindex
 
 def logtransform(df):
     
@@ -69,6 +62,7 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
         'linear' = linear regression
         'loess' = local nonlinear regression
         'first_diff' = first-difference filtering
+        'no' = no detrending
     :param bandwidth: bandwidth for Gaussian detrending. If None, chooses default bandwidth (using Silverman's rule of thumb).
     :param span: window size in case of loess, in percentage of time series length. If None, chooses default span (25%).
     :param degree: degree of polynomial in case of loess. If None, chooses default degree of 2.
@@ -110,75 +104,29 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
         else:
             degree = degree
             
-        trend = loess(time_index, ts, degree, span)
-        resid = ts - trend
+        # Here include code for local nonlinear regression
         
     elif detrending == 'first_diff':
         
         resid = np.diff(ts, n=1, axis=0)
         time_index_diff = time_index[0:(len(time_index) - 1)]
         
+    elif detrending == 'no':
+        
+        trend = ts
+        resid = ts
+        
     if detrending == 'first_diff':
         return resid, time_index_diff
     else:
         return trend, resid
 
-def loess(x, y, degree, span):
-    
-    """Local polynomial regression.
-    
-    Uses weighting of data points after R function loess. 
-    
-    :param x: times series indices.
-    :param y: time series.
-    :param degree: degree of polynomial.
-    :param span: window size in fraction of time series length.
-    :return: trend.
-    
-    Created by Arie Staal
-    """
-    
-    no_points = int(np.round(span*len(y)))
-    half_no_points = int(np.round(0.5*span*len(y)))
-    
-    maxdist = 0.5*span*len(y)
-    
-    p = np.empty(np.shape(y))
-    
-    for i in range(0,len(y)):
-        
-        if i < half_no_points:
-            x_span = x[0:no_points]
-            y_span = y[0:no_points]
-        
-        if (i >= half_no_points) & (i <= len(y) - half_no_points):
-            x_span = x[i - half_no_points : i + half_no_points]
-            y_span = y[i - half_no_points : i + half_no_points]
-            
-        if i > (len(y) - half_no_points):
-            x_span = x[len(y)-no_points+1:]
-            y_span = y[len(y)-no_points+1:]
-        
-        wi = np.empty(np.shape(y_span))
-        
-        cnt = 0
-        for x_i in x_span:
-            dist = np.absolute(x[i] - x_i) / (np.max(x) - np.min(x))
-            w_i[cnt] = (1 - (dist/maxdist)**3)**3
-            cnt = cnt + 1
-            
-        fit = np.poly1d(np.polyfit(x_span, y_span, deg=degree, w=w_i))
-        p[i] = fit(i)
-        
-    return p
-
-def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
+def EWS(ts,autocorrelation=False,variance=False,skewness=False,
         kurtosis=False, CV=False):
       
     """Function that calculates early warning signals
     
     :param timeseries: Original timeseries (column for every variable)
-    :param window_size: Set to size of rolling window, default setting does not use a rolling window
     :param autocorrelation: Set to True if autocorrelation is required in output
     :param variance: Set to True if variance is required in output
     :param skewness: Set to True if skewness is required in output
@@ -194,47 +142,38 @@ def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
     
     result={}
     
-    if window_size == None:
-        libs = 1
-        window_size = len(timeseries[:,0])
-    else:
-        libs = len(timeseries[:,0]) - window_size + 1
-    
     if autocorrelation == True:
-        AC=np.zeros((libs,nr_vars))
+        AC=[0]*nr_vars
     if variance == True:
-        Var=np.zeros((libs,nr_vars))
+        Var=[0]*nr_vars
     if skewness == True:
-        Skews=np.zeros((libs,nr_vars))
+        Skews=[0]*nr_vars
     if kurtosis == True:
-        Kurt=np.zeros((libs,nr_vars))
+        Kurt=[0]*nr_vars
     if CV == True:
-        CVs=np.zeros((libs,nr_vars))
+        CVs=[0]*nr_vars
     
-    for j in range(libs):
-        lib_ts=timeseries[j:j+window_size,:]
+    for i in range(nr_vars):
         
-        for i in range(nr_vars):
-            
-            if autocorrelation == True:
-                AC[j,i]=np.corrcoef(lib_ts[1:,i],lib_ts[:-1,i])[1,0]
-                result.update({'autocorrelation' : AC})            
-    
-            if variance == True:
-                Var[j,i]=np.var(lib_ts[:,i])
-                result.update({'variance' : Var})            
-    
-            if skewness == True:
-                Skews[j,i]=scipy.stats.skew(lib_ts[:,i])
-                result.update({'skewness' : Skews})            
-    
-            if kurtosis == True:
-                Kurt[j,i]=scipy.stats.kurtosis(lib_ts[:,i])
-                result.update({'kurtosis' : Kurt})
-    
-            if CV == True:
-                CVs[j,i]=np.std(lib_ts[:,i])/np.mean(lib_ts[:,i])
-                result.update({'CV' : CVs})        
+        if autocorrelation == True:
+            AC[i]=np.corrcoef(timeseries[1:,i],timeseries[:-1,i])[1,0]
+            result.update({'autocorrelation' : AC})            
+
+        if variance == True:
+            Var[i]=np.var(timeseries[:,i])
+            result.update({'variance' : Var})            
+
+        if skewness == True:
+            Skews[i]=scipy.stats.skew(timeseries[:,i])
+            result.update({'skewness' : Skews})            
+
+        if kurtosis == True:
+            Kurt[i]=scipy.stats.kurtosis(timeseries[:,i])
+            result.update({'kurtosis' : Kurt})
+
+        if CV == True:
+            CVs[i]=np.std(timeseries[:,i])/np.mean(timeseries[:,i])
+            result.update({'CV' : CVs})        
         
     return result
 
@@ -254,41 +193,17 @@ def EWS_rolling_window(df,winsize=50):
     
     #How to do this nicely? I think we should plug this into the EWS function!
 
-def kendalltau(indicatorvec):
-    ## Kendall trend statistic
-    timevec = range(len(indicatorvec))
-    tau, p_value = scipy.stats.kendalltau(timevec,indicatorvec)
+def kendalltrend(ts, type = 'simple'):
+    """Calculates the Kendall trend statistic for a EW indicators
+    
+    :ts: timeseries for the indicator. Can be array, series or a dataframe 
+    :return: Kendall tau value and p_value
+
+    """
+    ti = range(len(ts))
+    tau, p_value = scipy.stats.kendalltau(ti,ts)
     return [tau, p_value]
-
-# temporary input for Kendall trend statistic (remove when other functions are ready)
-nARR = [2,3,4,6,7,8,5,9,10,20]
-nACF = [2,3,4,6,7,8,5,9,10,20]
-nSD = [2,3,4,6,7,8,5,9,10,20]
-nSK = [2,3,4,6,7,8,5,9,10,20]
-nKURT = [2,3,4,6,7,8,5,9,10,20]
-nDENSITYRATIO = [2,3,4,6,7,8,5,9,10,20]
-nRETURNRATE = [2,3,4,6,7,8,5,9,10,20]
-nCV = [2,3,4,6,7,8,5,9,10,20]
-
-# Estimate Kendall trend statistic for indicators (ouput: [Tau,p_value])
-KtAR=kendalltau(nARR)
-KtACF=kendalltau(nACF)
-KtSD=kendalltau(nSD)
-KtSK=kendalltau(nSK)
-KtKU=kendalltau(nKURT)
-KtDENSITYRATIO=kendalltau(nDENSITYRATIO)
-KtRETURNRATE=kendalltau(nRETURNRATE)
-KtCV=kendalltau(nCV)
-
-#print Kendall output (to be removed later?)
-print('\nKtAR (Tau,p_value): %.4f, %.4f' % (KtAR[0],KtAR[1]))
-print('\nKtACF (Tau,p_value): %.4f, %.4f' % (KtACF[0],KtACF[1]))
-print('\nKtSD (Tau,p_value): %.4f, %.4f' % (KtSD[0],KtSD[1]))
-print('\nKtSK (Tau,p_value): %.4f, %.4f' % (KtSK[0],KtSK[1]))
-print('\nKtKU (Tau,p_value): %.4f, %.4f' % (KtKU[0],KtKU[1]))
-print('\nKtDENSITYRATIO (Tau,p_value): %.4f, %.4f' % (KtDENSITYRATIO[0],KtDENSITYRATIO[1]))
-print('\nKtRETURNRATE (Tau,p_value): %.4f, %.4f' % (KtRETURNRATE[0],KtRETURNRATE[1]))
-print('\nKtCV (Tau,p_value): %.4f, %.4f' % (KtCV[0],KtCV[1]))
+    
 
 #Interpolation function
 def interp(x, y, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0):
