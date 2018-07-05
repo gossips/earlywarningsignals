@@ -45,11 +45,11 @@ def test_EWS():
     output_kurtosis=[-1.1479289940828403, -1.0]
     result=EWS(input_ts,autocorrelation=True,variance=True,skewness=True,
                kurtosis=True,CV=True)
-    assert(result['autocorrelation'] == output_autocorrelation)
-    assert(result['variance'] == output_variance)
-    assert(result['skewness'] == output_skewness)
-    assert(result['kurtosis'] == output_kurtosis)
-    assert(result['CV'] == output_CV)
+    assert(np.all(result['autocorrelation'] == output_autocorrelation))
+    assert(np.all(result['variance'] == output_variance))
+    assert(np.all(result['skewness'] == output_skewness))
+    assert(np.all(result['kurtosis'] == output_kurtosis))
+    assert(np.all(result['CV'] == output_CV))
     
 def test_spaced():
     from earlywarningsignals import checkSpacing
