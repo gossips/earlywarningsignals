@@ -1,6 +1,6 @@
-from pytest import approx, raises
+from pytest import approx
 import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
 
 def test_dummy_pass():
     assert True
@@ -90,7 +90,30 @@ def test_timeseries():
     with raises(ValueError):
         check_time_series(input_3a, input_4b)
     
-    
+def test_kendalltrend():
+    from earlywarningsignals import kendalltrend
+    x = np.linspace(0, 100, 101)
+    in_ts_trend = np.exp(x*0.1) #test of timeseries with trend
+    in_ts_notrend = np.random.normal(0, 1, 101) #test of timeseries with trend
+    result_tr = kendalltrend(in_ts_trend)
+    result_ntr = kendalltrend(in_ts_notrend)
+    if result_tr[1] < 0.01 and result_ntr[1] > 0.01:
+        print("Test passed")
+
+def test_interp():
+    from earlywarningsignals import interp
+    x = np.linspace(0, 10, 11)
+    x_n = np.linspace(0, 10, 100)
+    y = np.cos(-x**2/9.0)
+    z_linear = interp(x, y, x_n, method = 'linear')
+    z_quadratic = interp(x, y, x_n, method = 'cubic')
+    plt.figure(1)
+    plt.plot(x, y, 'o-')
+    plt.plot(x_n, z_linear, 'o-')
+    plt.figure(2)
+    plt.plot(x, y, 'o-')
+    plt.plot(x_n, z_quadratic, 'o-')
+
     
     
     

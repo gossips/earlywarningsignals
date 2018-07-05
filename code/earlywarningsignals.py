@@ -5,6 +5,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 import pandas as pd
 from scipy import interpolate
+import matplotlib.pyplot as plt
 
 ## Description of the collection of functions
 
@@ -193,7 +194,7 @@ def EWS_rolling_window(df,winsize=50):
     
     #How to do this nicely? I think we should plug this into the EWS function!
 
-def kendalltrend(ts, type = 'simple'):
+def kendalltrend(ts):
     """Calculates the Kendall trend statistic for a EW indicators
     
     :ts: timeseries for the indicator. Can be array, series or a dataframe 
@@ -223,7 +224,6 @@ def interp(x, y, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0
         :param k: Degree of the spline fit. Must be <= 5. Default is k=3, a cubic spline. 
         :param s: Smoothing value. Default is 0. A rule of thumb can be s = m - sqrt(m) where m is the number of data-points being fit.
         :param der: The order of derivative of the spline to compute (must be less than or equal to k)
-        :rtype: array of interpolated values 
         Created by M Usman Mirza
     """
     if spline == False:
