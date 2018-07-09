@@ -2,6 +2,7 @@ from pytest import approx
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import pytest as pt
 
 def test_logtransform():
 
@@ -142,11 +143,11 @@ def test_timeseries():
     assert(isinstance(output_1a, pd.DataFrame))
 
     #check if evenly spaced check works
-    with raises(ValueError):
+    with pt.raises(ValueError):
         check_time_series(input_2a, input_2bb)
 
     #check if check if timeseries and timeindex have same length works
-    with raises(ValueError):
+    with pt.raises(ValueError):
         check_time_series(input_3a, input_4b)
 
 def test_kendalltrend():
