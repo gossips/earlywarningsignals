@@ -37,9 +37,9 @@ def check_time_series(data, timeindex=None):
             timeindex = pd.DataFrame(timeindex, columns=['Time'])
         if isinstance(timeindex, pd.DataFrame):
             timeindex = np.asarray(timeindex)
-            evenly = isUniformSpacing(spaced)
+            evenly = isUniformSpacing(timeindex)
             if evenly == False:
-                print("time index is not evenly spaced.")
+                print("time index is not evenly spaced")
         if timeseries.shape[0] == timeindex.shape[0]:
             print("right format for analysis")
         else:
