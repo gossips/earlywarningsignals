@@ -252,3 +252,52 @@ def interp(x, y, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0
         f = interpolate.splrep(x = x, y = y, k = k, s = s)
         i = interpolate.splev(x = new_x, tck = f, der = der)
         return i
+
+    def loess(x, y, degree, span):
+
+        """Local polynomial regression.
+
+        Uses weighting of data points after R function loess.
+
+        :param x: times series indices.
+        :param y: time series.
+        :param degree: degree of polynomial.
+        :param span: window size in fraction of time series length.
+        :return: trend.
+
+        Created by Arie Staal
+        """
+
+        no_points = int(np.round(span*len(y)))
+        half_no_points = int(np.round(0.5*span*len(y)))
+
+        maxdist = 0.5*span*len(y)
+
+        p = np.empty(np.shape(y))
+
+        for i in range(0,len(y)):
+
+            if i < half_no_points:
+                x_span = x[0:no_points]
+                y_span = y[0:no_points]
+
+            if (i >= half_no_points) & (i <= len(y) - half_no_points):
+                x_span = x[i - half_no_points : i + half_no_points]
+                y_span = y[i - half_no_points : i + half_no_points]
+
+            if i > (len(y) - half_no_points):
+                x_span = x[len(y)-no_points+1:]
+                y_span = y[len(y)-no_points+1:]
+
+            wi = np.empty(np.shape(y_span))
+
+            cnt = 0
+            for x_i in x_span:
+                dist = np.absolute(x[i] - x_i) / (np.max(x) - np.min(x))
+                w_i[cnt] = (1 - (dist/maxdist)**3)**3
+                cnt = cnt + 1
+
+            fit = np.poly1d(np.polyfit(x_span, y_span, deg=degree, w=w_i))
+            p[i] = fit(i)
+
+        return p
