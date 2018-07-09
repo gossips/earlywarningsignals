@@ -2,34 +2,35 @@ from pytest import approx
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-    
+
+
 def test_logtransform():
-    
+
     from earlywarningsignals import logtransform
-    
+
     # Test 1. Trying a known value
-    
+
     # Input and expected output
     x_in = pd.DataFrame(data=[0])
     y_computed = logtransform(x_in)
     y_expected = pd.DataFrame(data=[0.0])
-    
+
     # Check it
     assert (y_computed.equals(y_expected))
-    
+
     # Test 2. Trying a known value
-    
+
     # Input and expected output
-    x_in = pd.DataFrame(data=[1.0]) 
+    x_in = pd.DataFrame(data=[1.0])
     y_computed = logtransform(x_in)
     y_expected = pd.DataFrame(data=[0.69314718055994529])
-    
+
     # Check it
     assert (y_computed.equals(y_expected))
-    
+
 def test_EWS():
     from earlywarningsignals import EWS
-    
+
     # Test 1. Trying a known value
     np_input_ts=np.array([[1,6],[3,5],[4,4],[6,1]])
     input_ts=pd.DataFrame(data=np_input_ts)
@@ -45,23 +46,90 @@ def test_EWS():
     assert(np.all(result['skewness'] == output_skewness))
     assert(np.all(result['kurtosis'] == output_kurtosis))
     assert(np.all(result['CV'] == output_CV))
-    
+
 def test_spaced():
     from earlywarningsignals import checkSpacing
-    
+
     # Test 1: Trying a known value
     input_1 = np.arange(10)
     input_2 = np.arange(10)
     input_2[3]=9
     output_1= True
     output_2= False
-    
+
     assert(checkSpacing(input_1) == output_1)
     assert(checkSpacing(input_2) == output_2)
-    
+
+def test_check_timeseries_vector():
+    from earlywarningsignals import check_time_series
+
+    N = 10
+    input_vector = np.arange(N)
+    [ts, indices] = check_time_series(input_vector)
+
+    # The indices are correct
+    assert(np.min(indices) == 0)
+    assert(np.max(indices) == N-1)
+    # The number of elements is correct
+    assert(np.size(indices) == N)
+    assert(np.size(ts) == N)
+
+    # The output is a dataframe
+    assert(isinstance(ts, pd.DataFrame))
+
+    # The output is a dataframe
+    assert(isinstance(ts, pd.DataFrame))
+
+def test_check_timeseries_array():
+    from earlywarningsignals import check_time_series
+
+    input_array = np.array([[1,6],[3,5],[4,4],[6,1]])
+    [ts, indices] = check_time_series(input_array)
+
+    # The indices are correct
+    assert(np.min(indices) == 0)
+    assert(np.max(indices) == 4-1)
+
+    # The number of elements is correct
+    assert(np.size(indices) == 4)
+
+    # The output is a dataframe
+    assert(isinstance(ts, pd.DataFrame))
+
+def test_check_timeseries_dataframe():
+    from earlywarningsignals import check_time_series
+
+    N = 10
+    input_vector = np.arange(N)
+    input_df = pd.DataFrame(input_vector)
+    [ts, indices] = check_time_series(input_df)
+
+    # The indices are correct
+    assert(np.min(indices) == 0)
+    assert(np.max(indices) == N-1)
+    # The number of elements is correct
+    assert(np.size(indices) == N)
+    assert(np.size(ts) == N)
+
+def test_check_timeseries_customtimes():
+    from earlywarningsignals import check_time_series
+
+    N = 10
+    input_vector = np.arange(N)
+    input_times = np.linspace(0, 0.9, N) # 0, 0.1, 0.2, ..., 0.9
+    input_df = pd.DataFrame(input_vector, input_times)
+    [ts, indices] = check_time_series(input_df)
+
+    # The indices are correct
+    assert(indices.all() == input_times.all())
+
+    # The number of elements is correct
+    assert(np.size(indices) == N)
+    assert(np.size(ts) == N)
+
 def test_timeseries():
     from earlywarningsignals import check_time_series
-    
+
     # Test 1: Trying a known value
     input_1a = np.arange(10)*2
     input_1b = np.arange(10)
@@ -76,15 +144,15 @@ def test_timeseries():
     [output_1a, output_1b] = check_time_series(input_1a)
     #still have to write asserts
     assert(isinstance(output_1a, pd.DataFrame))
-    
+
     #check if evenly spaced check works
     with raises(ValueError):
         check_time_series(input_2a, input_2bb)
-        
+
     #check if check if timeseries and timeindex have same length works
     with raises(ValueError):
         check_time_series(input_3a, input_4b)
-    
+
 def test_kendalltrend():
     from earlywarningsignals import kendalltrend
     x = np.linspace(0, 100, 101)
@@ -92,29 +160,22 @@ def test_kendalltrend():
     in_ts_notrend = np.random.normal(0, 1, 101) #test of timeseries with trend
     result_tr = kendalltrend(in_ts_trend)
     result_ntr = kendalltrend(in_ts_notrend)
-    
+
     assert(result_tr[1] < 0.01 and result_ntr[1] > 0.01)
 
 def test_interp():
     from earlywarningsignals import interp
-    
+
     # Generate the data
     fun = lambda x: np.cos(-x**2/9.0)
     x = np.linspace(0, 10, 25)
     y = fun(x)
-    
+
     # Interpolate
     x_n = np.linspace(0, 10, 100)
     y_n = interp(x, y, x_n, method = 'cubic')
-    
+
     # Check equality under tolerance
-    absTol = 0.05    
+    absTol = 0.05
     absErrs = np.abs(y_n - fun(x_n))
     assert(absErrs.max() < absTol)
-
-    
-    
-    
-    
-    
-    
