@@ -97,8 +97,8 @@ def test_kendalltrend():
     in_ts_notrend = np.random.normal(0, 1, 101) #test of timeseries with trend
     result_tr = kendalltrend(in_ts_trend)
     result_ntr = kendalltrend(in_ts_notrend)
-    if result_tr[1] < 0.01 and result_ntr[1] > 0.01:
-        print("Test passed")
+    
+    assert(result_tr[1] < 0.01 and result_ntr[1] > 0.01)
 
 def test_interp():
     from earlywarningsignals import interp
