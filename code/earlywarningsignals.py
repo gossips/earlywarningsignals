@@ -39,11 +39,12 @@ def check_time_series(data, timeindex=None):
             timeindex = np.asarray(timeindex)
             evenly = isUniformSpacing(timeindex)
             if evenly == False:
-                print("time index is not evenly spaced")
+                raise ValueError("time index is not evenly spaced")
         if timeseries.shape[0] == timeindex.shape[0]:
             print("right format for analysis")
         else:
-            print("timeindex and data do not have the same length")
+            raise ValueError("timeindex and data do not have the same length")
+
     return timeseries, timeindex
 
 def logtransform(df):
@@ -70,7 +71,6 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
         'linear' = linear regression
         'loess' = local nonlinear regression
         'first_diff' = first-difference filtering
-        'no' = no detrending
     :param bandwidth: bandwidth for Gaussian detrending. If None, chooses default bandwidth (using Silverman's rule of thumb).
     :param span: window size in case of loess, in percentage of time series length. If None, chooses default span (25%).
     :param degree: degree of polynomial in case of loess. If None, chooses default degree of 2.
@@ -112,7 +112,8 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
         else:
             degree = degree
 
-        # Here include code for local nonlinear regression
+        trend = loess(time_index, ts, degree, span)
+        resid = ts - trend
 
     elif detrending == 'first_diff':
 
@@ -195,7 +196,6 @@ def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
 
     return result
 
-
 def EWS_rolling_window(df,winsize=50):
 
     """Use a rolling window on which EWS are calculated
@@ -242,6 +242,7 @@ def interp(x, y, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0
         :param k: Degree of the spline fit. Must be <= 5. Default is k=3, a cubic spline.
         :param s: Smoothing value. Default is 0. A rule of thumb can be s = m - sqrt(m) where m is the number of data-points being fit.
         :param der: The order of derivative of the spline to compute (must be less than or equal to k)
+        :rtype: array of interpolated values
         Created by M Usman Mirza
     """
     if spline == False:

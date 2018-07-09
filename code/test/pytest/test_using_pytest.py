@@ -142,11 +142,11 @@ def test_timeseries():
     #still have to write asserts
     assert(isinstance(output_1a, pd.DataFrame))
 
-    #check if evenly spaced check works
+    #Check if evenly spaced check works
     with pt.raises(ValueError):
         check_time_series(input_2a, input_2bb)
 
-    #check if check if timeseries and timeindex have same length works
+    #Check if timeseries and timeindex have same length
     with pt.raises(ValueError):
         check_time_series(input_3a, input_4b)
 
