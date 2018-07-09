@@ -102,17 +102,20 @@ def test_kendalltrend():
 
 def test_interp():
     from earlywarningsignals import interp
-    x = np.linspace(0, 10, 11)
+    
+    # Generate the data
+    fun = lambda x: np.cos(-x**2/9.0)
+    x = np.linspace(0, 10, 25)
+    y = fun(x)
+    
+    # Interpolate
     x_n = np.linspace(0, 10, 100)
-    y = np.cos(-x**2/9.0)
-    z_linear = interp(x, y, x_n, method = 'linear')
-    z_quadratic = interp(x, y, x_n, method = 'cubic')
-    plt.figure(1)
-    plt.plot(x, y, 'o-')
-    plt.plot(x_n, z_linear, 'o-')
-    plt.figure(2)
-    plt.plot(x, y, 'o-')
-    plt.plot(x_n, z_quadratic, 'o-')
+    y_n = interp(x, y, x_n, method = 'cubic')
+    
+    # Check equality under tolerance
+    absTol = 0.05    
+    absErrs = np.abs(y_n - fun(x_n))
+    assert(absErrs.max() < absTol)
 
     
     
