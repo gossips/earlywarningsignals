@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-
 def test_logtransform():
 
     from earlywarningsignals import logtransform
@@ -47,18 +46,15 @@ def test_EWS():
     assert(np.all(result['kurtosis'] == output_kurtosis))
     assert(np.all(result['CV'] == output_CV))
 
-def test_spaced():
-    from earlywarningsignals import checkSpacing
+def test_isUniformSpacing():
+    from earlywarningsignals import isUniformSpacing
 
-    # Test 1: Trying a known value
-    input_1 = np.arange(10)
-    input_2 = np.arange(10)
-    input_2[3]=9
-    output_1= True
-    output_2= False
+    input_good = np.arange(10) # 0, 1, ..., 10
+    input_bad = np.arange(10) # 0, 1, 9, 3, ..., 10
+    input_bad[3]=9
 
-    assert(checkSpacing(input_1) == output_1)
-    assert(checkSpacing(input_2) == output_2)
+    assert(isUniformSpacing(input_good)) # Expected True
+    assert(~isUniformSpacing(input_bad)) # Expected not True
 
 def test_check_timeseries_vector():
     from earlywarningsignals import check_time_series

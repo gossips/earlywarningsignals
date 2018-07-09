@@ -9,9 +9,17 @@ import matplotlib.pyplot as plt
 
 ## Description of the collection of functions
 
-def checkSpacing(iterator):
-    iterator=np.asarray(iterator)
-    return len(set(iterator)) <= 1 #set builds an unordered collection of unique elements.
+def isUniformSpacing(vector):
+    """Checks if the spacing is uniform
+
+    :param vector: the vector to be checked
+    """
+
+    vector=np.asarray(vector)
+    diff = vector[1:]-vector[0:-1]
+
+    # Spacing is uniform if and only if maximum and minimum steps are the same
+    return (np.max(diff) == np.min(diff))
 
 def check_time_series(data, timeindex=None):
     ## Dummy function.
@@ -29,8 +37,7 @@ def check_time_series(data, timeindex=None):
             timeindex = pd.DataFrame(timeindex, columns=['Time'])
         if isinstance(timeindex, pd.DataFrame):
             timeindex = np.asarray(timeindex)
-            spaced = timeindex[1:]-timeindex[0:-1]
-            evenly = checkSpacing(spaced)
+            evenly = isUniformSpacing(spaced)
             if evenly == False:
                 print("time index is not evenly spaced.")
         if timeseries.shape[0] == timeindex.shape[0]:
@@ -177,7 +184,7 @@ def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
             if skewness == True:
                 Skews[j,i]=scipy.stats.skew(lib_ts[:,i])
                 result.update({'skewness' : Skews})
-    
+
             if kurtosis == True:
                 Kurt[j,i]=scipy.stats.kurtosis(lib_ts[:,i])
                 result.update({'kurtosis' : Kurt})
