@@ -102,7 +102,7 @@ def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
             trend = intercept + slope * x
             resid = ts[column] - trend
   
-      ''' THIS PART WILL BE UPDATED
+        ''' THIS PART WILL BE UPDATED
         elif detrending == 'loess':
         
             if span == None:
