@@ -61,11 +61,11 @@ def logtransform(df):
     df_log=df.apply(np.log)
     return df_log
 
-def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree=None):
-
+def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
+    
     """Detrend time series.
-
-    :param timeseries: array with time indices in the first column and time series values in the second.
+    
+    :param ts: data frame with time indices as index and time series values in the columns.
     :param detrending: either
         'gaussian' = Gaussian detrending
         'linear' = linear regression
@@ -75,60 +75,65 @@ def detrend(timeseries, detrending='gaussian', bandwidth=None, span=None, degree
     :param span: window size in case of loess, in percentage of time series length. If None, chooses default span (25%).
     :param degree: degree of polynomial in case of loess. If None, chooses default degree of 2.
     :return: trend and residuals. In case of first_diff, returns residuals and difference between consecutive time values.
-
+    
     Created by Arie Staal
     """
+    
+    ts_trend = pd.DataFrame().reindex_like(ts)
+    ts_residual = pd.DataFrame().reindex_like(ts)
+    
+    for column in ts:
+    
+        if detrending == 'gaussian':
+        
+            if bandwidth == None:
+                # Silverman's rule of thumb
+                bw = 0.9 * min(ts[column].std(), (ts[column].quantile(0.75) - ts[column].quantile(0.25)) / 1.34) * ts.shape[0]**(-0.2)
+            else:
+                bw = round(ts.shape[0] * bandwidth/100)
+            
+            trend = gaussian_filter1d(ts[column], bw, axis=0) # smY in R code
+            resid = ts[column] - trend                                # nsmY in R code
+        
+        elif detrending == 'linear': 
+        
+            x = np.linspace(0, ts.shape[0], ts.shape[0])
+            slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,ts[column])
+            trend = intercept + slope * x
+            resid = ts[column] - trend
+  
+      ''' THIS PART WILL BE UPDATED
+        elif detrending == 'loess':
+        
+            if span == None:
+                span = 25/100
+            else:
+                span = span/100
+            
+            if degree == None:
+                degree = 2
+            else:
+                degree = degree
+            
+            trend = loess(time_index, ts[column], degree, span)
+            resid = ts[column] - trend
+        
+        elif detrending == 'first_diff':
+        
+            resid = np.diff(ts, n=1, axis=0)
+            time_index_diff = time_index[0:(len(time_index) - 1)]
+        '''
+        
+        ts_residual[column] = resid
+        ts_trend[column] = trend
 
-    ts = timeseries[:,1]
-    time_index = timeseries[:,0]
-
-    if detrending == 'gaussian':
-
-        if bandwidth == None:
-            # Silverman's rule of thumb
-            bw = 0.9 * min(np.std(ts), (np.percentile(ts, 75) - np.percentile(ts, 25)) / 1.34) * len(ts)**(-0.2)
-        else:
-            bw = round(len(ts) * bandwidth/100)
-
-        trend = gaussian_filter1d(ts, bw, axis=0) # smY in R code
-        resid = ts - trend                        # nsmY in R code
-
-    elif detrending == 'linear':
-
-        x = np.linspace(0, len(ts), len(ts))
-        slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,ts)
-        trend = intercept + slope * x
-        resid = ts - trend
-
-    elif detrending == 'loess':
-
-        if span == None:
-            span = 25/100
-        else:
-            span = span/100
-
-        if degree == None:
-            degree = 2
-        else:
-            degree = degree
-
-        trend = loess(time_index, ts, degree, span)
-        resid = ts - trend
-
-    elif detrending == 'first_diff':
-
-        resid = np.diff(ts, n=1, axis=0)
-        time_index_diff = time_index[0:(len(time_index) - 1)]
-
-    elif detrending == 'no':
-
-        trend = ts
-        resid = ts
-
-    if detrending == 'first_diff':
-        return resid, time_index_diff
-    else:
-        return trend, resid
+        
+    #if detrending == 'first_diff':
+    #    return resid, time_index_diff
+    #else:
+    #    return trend, resid
+    
+    return ts_trend, ts_residual
 
 def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
         kurtosis=False, CV=False):

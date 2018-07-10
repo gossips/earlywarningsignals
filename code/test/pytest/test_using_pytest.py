@@ -176,3 +176,45 @@ def test_interp():
     absTol = 0.05
     absErrs = np.abs(y_n - fun(x_n))
     assert(absErrs.max() < absTol)
+    
+def test_detrend():
+    from earlywarningsignals import detrend
+    from pandas.util.testing import assert_frame_equal
+    
+    # test 1: linear trend
+    # Input and output timeseries with linear trend
+    in_lin_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_lin_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_lin_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_lin_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    # do test 
+    ts= pd.DataFrame({'ts1': in_lin_trend1, 'ts2': in_lin_trend2})
+    output_lin= pd.DataFrame({'ts1': out_lin_trend1, 'ts2': out_lin_trend2})
+    ts_trend, ts_resid = detrend(ts, detrending='linear')
+    assert_frame_equal(ts_resid, output_lin, check_less_precise=2)
+    
+    # test 2: gaussian trend
+    # @ Bregje: input and output timeseries here
+    in_gaus_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_gaus_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_gaus_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_gaus_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    
+    # test 3: loess trend
+    # @ Bregje: input and output timeseries here
+    in_loess_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_loess_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_loess_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_loess_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    
+    # test 4: first_difference
+    # @ Bregje: input and output timeseries here
+    in_fd_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_fd_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_fd_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_fd_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    
+    # test 5: test whether ts - ts_trend = ts_resid
+    assert_frame_equal(ts - ts_trend, ts_resid)
+    
+
