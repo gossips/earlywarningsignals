@@ -87,12 +87,12 @@ def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
         
             if bandwidth == None:
                 # Silverman's rule of thumb
-                bw = 0.9 * min(ts[column].std(), (ts[column].quantile(0.75) - ts[column].quantile(0.25)) / 1.34) * ts.shape[0]**(-0.2)
+                bw = round(ts.shape[0] * 0.9 * min(ts[column].std(), (ts[column].quantile(0.75) - ts[column].quantile(0.25)) / 1.34) * ts.shape[0]**(-0.2))
             else:
                 bw = round(ts.shape[0] * bandwidth/100)
             
             trend = gaussian_filter1d(ts[column], bw, axis=0) # smY in R code
-            resid = ts[column] - trend                                # nsmY in R code
+            resid = ts[column] - trend                        # nsmY in R code
         
         elif detrending == 'linear': 
         
