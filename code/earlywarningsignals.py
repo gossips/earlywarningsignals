@@ -104,16 +104,16 @@ def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
         elif detrending == 'loess':
         
             if span == None:
-                span = 25/100
+                span_i = 25/100
             else:
-                span = span/100
+                span_i = span/100
             
             if degree == None:
                 degree = 2
             else:
                 degree = degree
             
-            trend = loess(ts[column], degree=degree, span=span)
+            trend = loess(ts[column], degree=degree, span=span_i)
             resid = ts[column] - trend
         
         # first difference is left out compared to the original R code
@@ -122,6 +122,7 @@ def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
         ts_trend[column] = trend
     
     return ts_trend, ts_residual
+
 
 def loess(y, degree=None, span=None):
     
@@ -146,13 +147,14 @@ def loess(y, degree=None, span=None):
     
     p = np.empty(np.shape(y))
     
-    for i in range(0,len(y)):
+    for i in range(0, len(y)):
+
         
         if i < half_no_points:
             x_span = x[0:no_points]
             y_span = y[0:no_points]
         
-        if (i >= half_no_points) & (i <= len(y) - half_no_points):
+        if (i >= half_no_points) & (i <= (len(y) - half_no_points)):
             x_span = x[i - half_no_points : i + half_no_points]
             y_span = y[i - half_no_points : i + half_no_points]
             
@@ -167,7 +169,7 @@ def loess(y, degree=None, span=None):
             dist = np.absolute(x[i] - x_i) / (np.max(x) - np.min(x))
             w_i[cnt] = (1 - (dist/maxdist)**3)**3
             cnt = cnt + 1
-            
+        
         if len(x_span) <= degree:
             raise TypeError("Window length should be higher than the degree of the fitted polynomial.")
         
