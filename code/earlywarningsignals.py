@@ -70,7 +70,6 @@ def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
         'gaussian' = Gaussian detrending
         'linear' = linear regression
         'loess' = local nonlinear regression
-        'first_diff' = first-difference filtering
     :param bandwidth: bandwidth for Gaussian detrending. If None, chooses default bandwidth (using Silverman's rule of thumb).
     :param span: window size in case of loess, in percentage of time series length. If None, chooses default span (25%).
     :param degree: degree of polynomial in case of loess. If None, chooses default degree of 2.
@@ -101,8 +100,7 @@ def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
             slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x,ts[column])
             trend = intercept + slope * x
             resid = ts[column] - trend
-  
-        ''' THIS PART WILL BE UPDATED
+        
         elif detrending == 'loess':
         
             if span == None:
@@ -115,25 +113,68 @@ def detrend(ts, detrending='gaussian', bandwidth=None, span=None, degree=None):
             else:
                 degree = degree
             
-            trend = loess(time_index, ts[column], degree, span)
+            trend = loess(ts[column], degree=degree, span=span)
             resid = ts[column] - trend
         
-        elif detrending == 'first_diff':
-        
-            resid = np.diff(ts, n=1, axis=0)
-            time_index_diff = time_index[0:(len(time_index) - 1)]
-        '''
+        # first difference is left out compared to the original R code
         
         ts_residual[column] = resid
         ts_trend[column] = trend
-
-        
-    #if detrending == 'first_diff':
-    #    return resid, time_index_diff
-    #else:
-    #    return trend, resid
     
     return ts_trend, ts_residual
+
+def loess(y, degree=None, span=None):
+    
+    """Local polynomial regression.
+    
+    Uses weighting of data points after R function loess. 
+    
+    :param y: time series.
+    :param degree: degree of polynomial.
+    :param span: window size in fraction of time series length.
+    :return: trend.
+    
+    Created by Arie Staal
+    """
+    
+    x = y.index.values
+    
+    no_points = int(np.round(span*len(y)))
+    half_no_points = int(np.round(0.5*span*len(y)))
+    
+    maxdist = 0.5*span*len(y)
+    
+    p = np.empty(np.shape(y))
+    
+    for i in range(0,len(y)):
+        
+        if i < half_no_points:
+            x_span = x[0:no_points]
+            y_span = y[0:no_points]
+        
+        if (i >= half_no_points) & (i <= len(y) - half_no_points):
+            x_span = x[i - half_no_points : i + half_no_points]
+            y_span = y[i - half_no_points : i + half_no_points]
+            
+        if i > (len(y) - half_no_points):
+            x_span = x[len(y)-no_points+1:]
+            y_span = y[len(y)-no_points+1:]
+        
+        w_i = np.empty(np.shape(y_span))
+        
+        cnt = 0
+        for x_i in x_span:
+            dist = np.absolute(x[i] - x_i) / (np.max(x) - np.min(x))
+            w_i[cnt] = (1 - (dist/maxdist)**3)**3
+            cnt = cnt + 1
+            
+        if len(x_span) <= degree:
+            raise TypeError("Window length should be higher than the degree of the fitted polynomial.")
+        
+        fit = np.poly1d(np.polyfit(x_span, y_span, deg=degree, w=w_i))
+        p[i] = fit(i)
+        
+    return p
 
 def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
         kurtosis=False, CV=False):
