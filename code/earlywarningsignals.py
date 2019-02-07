@@ -263,22 +263,23 @@ def EWS_rolling_window(df,winsize=50):
 def kendalltrend(ts):
     """Calculates the Kendall trend statistic for a EW indicators
 
-    :ts: timeseries for the indicator. Can be array, series or a dataframe
-    :return: Kendall tau value and p_value
+    :ts: Dataframe of timeseries for the indicator
+    :return: Kendall tau value and p_value per column
+    Created by M Usman Mirza
 
     """
-    ti = range(len(ts))
-    tau, p_value = scipy.stats.kendalltau(ti,ts)
-    return [tau, p_value]
-
+    k_tau = []
+    for y in ts:
+        ti = range(len(df[y]))
+        tau, p_value = scipy.stats.kendalltau(ti, df[y])
+        k_tau.append([y, tau, p_value])
+    return k_tau
+        
 
 #Interpolation function
-def interp(x, y, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0):
-    """
-    .. function:: interp(x, y, new_x, dim, method, spline, k, s, der)
-        Function interpolates timeseries with different methods.
-        :param x: time index. In case of dataframe use df.iloc to refer the correct column. Required value.
-        :param y: Original data values. Must be the same lenght as x. In case of dataframe use df.iloc to refer the correct column. Required value.
+def interp(df, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0):
+    """Function interpolates timeseries with different methods.
+        :param df: Dataframe of timeseries with index. Required value.
         :param new_x: Index values at which to interpolate data. Required value.
         :param method: Specifies interpolation method used. One of
             'nearest': return the value at the data point closest to the point of interpolation.
@@ -290,63 +291,68 @@ def interp(x, y, new_x, method = 'linear', spline = False, k = 3, s = 0, der = 0
         :param k: Degree of the spline fit. Must be <= 5. Default is k=3, a cubic spline.
         :param s: Smoothing value. Default is 0. A rule of thumb can be s = m - sqrt(m) where m is the number of data-points being fit.
         :param der: The order of derivative of the spline to compute (must be less than or equal to k)
-        :rtype: array of interpolated values
+        :rtype: Dataframe of interpolated values
         Created by M Usman Mirza
     """
-    if spline == False:
-        f = interpolate.interp1d(x = x, y = y, kind = method)
-        i = f(new_x)
-        return i
-    elif spline == True:
-        f = interpolate.splrep(x = x, y = y, k = k, s = s)
-        i = interpolate.splev(x = new_x, tck = f, der = der)
-        return i
+    df_x = df.index.tolist()
+    df_new = pd.DataFrame(columns = df.columns, index = new_x)
+    for y in df:
+        if spline == False:
+            f = interpolate.interp1d(x = df_x, y = df[y].tolist(), kind = method)
+            i = f(new_x)
+            df_new[y] = i
+            
+        elif spline == True:
+            f = interpolate.splrep(x = x, y = df[y].tolist(), k = k, s = s)
+            i = interpolate.splev(x = new_x, tck = f, der = der)
+            df_new[y] = i
+    return df_new
 
-    def loess(x, y, degree, span):
+def loess(x, y, degree, span):
 
-        """Local polynomial regression.
+    """Local polynomial regression.
 
-        Uses weighting of data points after R function loess.
+    Uses weighting of data points after R function loess.
 
-        :param x: times series indices.
-        :param y: time series.
-        :param degree: degree of polynomial.
-        :param span: window size in fraction of time series length.
-        :return: trend.
+    :param x: times series indices.
+    :param y: time series.
+    :param degree: degree of polynomial.
+    :param span: window size in fraction of time series length.
+    :return: trend.
 
-        Created by Arie Staal
-        """
+    Created by Arie Staal
+    """
 
-        no_points = int(np.round(span*len(y)))
-        half_no_points = int(np.round(0.5*span*len(y)))
+    no_points = int(np.round(span*len(y)))
+    half_no_points = int(np.round(0.5*span*len(y)))
 
-        maxdist = 0.5*span*len(y)
+    maxdist = 0.5*span*len(y)
 
-        p = np.empty(np.shape(y))
+    p = np.empty(np.shape(y))
 
-        for i in range(0,len(y)):
+    for i in range(0,len(y)):
 
-            if i < half_no_points:
-                x_span = x[0:no_points]
-                y_span = y[0:no_points]
+        if i < half_no_points:
+            x_span = x[0:no_points]
+            y_span = y[0:no_points]
 
-            if (i >= half_no_points) & (i <= len(y) - half_no_points):
-                x_span = x[i - half_no_points : i + half_no_points]
-                y_span = y[i - half_no_points : i + half_no_points]
+        if (i >= half_no_points) & (i <= len(y) - half_no_points):
+            x_span = x[i - half_no_points : i + half_no_points]
+            y_span = y[i - half_no_points : i + half_no_points]
 
-            if i > (len(y) - half_no_points):
-                x_span = x[len(y)-no_points+1:]
-                y_span = y[len(y)-no_points+1:]
+        if i > (len(y) - half_no_points):
+            x_span = x[len(y)-no_points+1:]
+            y_span = y[len(y)-no_points+1:]
 
-            wi = np.empty(np.shape(y_span))
+        wi = np.empty(np.shape(y_span))
 
-            cnt = 0
-            for x_i in x_span:
-                dist = np.absolute(x[i] - x_i) / (np.max(x) - np.min(x))
-                w_i[cnt] = (1 - (dist/maxdist)**3)**3
-                cnt = cnt + 1
+        cnt = 0
+        for x_i in x_span:
+            dist = np.absolute(x[i] - x_i) / (np.max(x) - np.min(x))
+            w_i[cnt] = (1 - (dist/maxdist)**3)**3
+            cnt = cnt + 1
 
-            fit = np.poly1d(np.polyfit(x_span, y_span, deg=degree, w=w_i))
-            p[i] = fit(i)
+        fit = np.poly1d(np.polyfit(x_span, y_span, deg=degree, w=w_i))
+        p[i] = fit(i)
 
-        return p
+    return p
