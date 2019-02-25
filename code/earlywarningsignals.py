@@ -282,15 +282,11 @@ def kendalltrend(ts):
 
     :ts: Dataframe of timeseries for the indicator
     :return: Kendall tau value and p_value per column
-    Created by M Usman Mirza
-
     """
-    k_tau = []
-    for y in ts:
-        ti = range(len(df[y]))
-        tau, p_value = scipy.stats.kendalltau(ti, df[y])
-        k_tau.append([y, tau, p_value])
-    return k_tau
+    ti = range(len(ts))
+    tau, p_value = scipy.stats.kendalltau(ti,ts)
+    return [tau, p_value]
+
         
 
 #Interpolation function
