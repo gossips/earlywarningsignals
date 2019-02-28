@@ -248,15 +248,19 @@ def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
         plt.show()
     if variance == True:
         plt.plot(result['variance'])
+        plt.title('variance')
         plt.show()
     if skewness == True:
         plt.plot(result['skewness'])
+        plt.title('skewness')
         plt.show()
     if kurtosis == True:
         plt.plot(result['kurtosis'])
+        plt.title('kurtosis')
         plt.show()
     if CV == True:
         plt.plot(result['CV'])
+        plt.title('coefficient of variation')
         plt.show()
         
     return result
