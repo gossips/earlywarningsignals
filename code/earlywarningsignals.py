@@ -179,7 +179,7 @@ def loess(y, degree=None, span=None):
     return p
 
 def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
-        kurtosis=False, CV=False):
+        kurtosis=False, CV=False,plots=True):
 
     """Function that calculates early warning signals
 
@@ -242,26 +242,27 @@ def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
                 CVs[j,i]=np.std(lib_ts[:,i])/np.mean(lib_ts[:,i])
                 result.update({'CV' : CVs})
                 
-    if autocorrelation == True:
-        plt.plot(result['autocorrelation'])
-        plt.title('autocorrelation')
-        plt.show()
-    if variance == True:
-        plt.plot(result['variance'])
-        plt.title('variance')
-        plt.show()
-    if skewness == True:
-        plt.plot(result['skewness'])
-        plt.title('skewness')
-        plt.show()
-    if kurtosis == True:
-        plt.plot(result['kurtosis'])
-        plt.title('kurtosis')
-        plt.show()
-    if CV == True:
-        plt.plot(result['CV'])
-        plt.title('coefficient of variation')
-        plt.show()
+    if plots == True:        
+        if autocorrelation == True:
+            plt.plot(result['autocorrelation'])
+            plt.title('autocorrelation')
+            plt.show()
+        if variance == True:
+            plt.plot(result['variance'])
+            plt.title('variance')
+            plt.show()
+        if skewness == True:
+            plt.plot(result['skewness'])
+            plt.title('skewness')
+            plt.show()
+        if kurtosis == True:
+            plt.plot(result['kurtosis'])
+            plt.title('kurtosis')
+            plt.show()
+        if CV == True:
+            plt.plot(result['CV'])
+            plt.title('coefficient of variation')
+            plt.show()
         
     return result
 

@@ -40,7 +40,7 @@ def test_EWS():
     output_CV=[0.51507875363771272, 0.46770717334674267]
     output_kurtosis=[-1.1479289940828403, -1.0]
     result=EWS(input_ts,autocorrelation=True,variance=True,skewness=True,
-               kurtosis=True,CV=True)
+               kurtosis=True,CV=True,plots=False)
     assert(np.all(result['autocorrelation'] == output_autocorrelation))
     assert(np.all(result['variance'] == output_variance))
     assert(np.all(result['skewness'] == output_skewness))
