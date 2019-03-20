@@ -40,7 +40,7 @@ def test_EWS():
     output_CV=[0.51507875363771272, 0.46770717334674267]
     output_kurtosis=[-1.1479289940828403, -1.0]
     result=EWS(input_ts,autocorrelation=True,variance=True,skewness=True,
-               kurtosis=True,CV=True)
+               kurtosis=True,CV=True,plots=False)
     assert(np.all(result['autocorrelation'] == output_autocorrelation))
     assert(np.all(result['variance'] == output_variance))
     assert(np.all(result['skewness'] == output_skewness))
@@ -161,6 +161,7 @@ def test_kendalltrend():
     assert(result_tr[1] < 0.01 and result_ntr[1] > 0.01)
 
 def test_interp():
+    import pandas as pd
     from earlywarningsignals import interp
 
     # Generate the data
@@ -168,10 +169,16 @@ def test_interp():
     x = np.linspace(0, 10, 25)
     y = fun(x)
 
+    # Write in the form of a data frame
+    df = pd.DataFrame(y, index = x)
+    
     # Interpolate
     x_n = np.linspace(0, 10, 100)
-    y_n = interp(x, y, x_n, method = 'cubic')
+    df_n = interp(df, x_n, method = 'cubic')
 
+    # Extract interpolated ys
+    y_n = df_n.values.T
+    
     # Check equality under tolerance
     absTol = 0.05
     absErrs = np.abs(y_n - fun(x_n))
