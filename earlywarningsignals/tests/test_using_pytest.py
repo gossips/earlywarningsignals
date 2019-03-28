@@ -6,7 +6,7 @@ import pytest as pt
 
 def test_logtransform():
 
-    from earlywarningsignals import logtransform
+    from earlywarningsignals.earlywarningsignals import logtransform
 
     # Test 1. Trying a known value
 
@@ -29,7 +29,7 @@ def test_logtransform():
     assert (y_computed.equals(y_expected))
 
 def test_EWS():
-    from earlywarningsignals import EWS
+    from earlywarningsignals.earlywarningsignals import EWS
 
     # Test 1. Trying a known value
     np_input_ts=np.array([[1,6],[3,5],[4,4],[6,1]])
@@ -48,7 +48,7 @@ def test_EWS():
     assert(np.all(result['CV'] == output_CV))
 
 def test_isUniformSpacing():
-    from earlywarningsignals import isUniformSpacing
+    from earlywarningsignals.earlywarningsignals import isUniformSpacing
 
     input_good = np.arange(10) # 0, 1, ..., 10
     input_bad = np.arange(10) # 0, 1, 9, 3, ..., 10
@@ -58,7 +58,7 @@ def test_isUniformSpacing():
     assert(~isUniformSpacing(input_bad)) # Expected not True
 
 def test_check_timeseries_vector():
-    from earlywarningsignals import check_time_series
+    from earlywarningsignals.earlywarningsignals import check_time_series
 
     N = 10
     input_vector = np.arange(N)
@@ -78,7 +78,7 @@ def test_check_timeseries_vector():
     assert(isinstance(ts, pd.DataFrame))
 
 def test_check_timeseries_array():
-    from earlywarningsignals import check_time_series
+    from earlywarningsignals.earlywarningsignals import check_time_series
 
     input_array = np.array([[1,6],[3,5],[4,4],[6,1]])
     [ts, indices] = check_time_series(input_array)
@@ -94,7 +94,7 @@ def test_check_timeseries_array():
     assert(isinstance(ts, pd.DataFrame))
 
 def test_check_timeseries_dataframe():
-    from earlywarningsignals import check_time_series
+    from earlywarningsignals.earlywarningsignals import check_time_series
 
     N = 10
     input_vector = np.arange(N)
@@ -109,7 +109,7 @@ def test_check_timeseries_dataframe():
     assert(np.size(ts) == N)
 
 def test_check_timeseries_customtimes():
-    from earlywarningsignals import check_time_series
+    from earlywarningsignals.earlywarningsignals import check_time_series
 
     N = 10
     input_vector = np.arange(N)
@@ -125,7 +125,7 @@ def test_check_timeseries_customtimes():
     assert(np.size(ts) == N)
 
 def test_timeseries():
-    from earlywarningsignals import check_time_series
+    from earlywarningsignals.earlywarningsignals import check_time_series
 
     # Test 1: Trying a known value
     input_1a = np.arange(10)*2
@@ -151,7 +151,7 @@ def test_timeseries():
         check_time_series(input_3a, input_4b)
 
 def test_kendalltrend():
-    from earlywarningsignals import kendalltrend
+    from earlywarningsignals.earlywarningsignals import kendalltrend
     x = np.linspace(0, 100, 101)
     in_ts_trend = np.exp(x*0.1) #test of timeseries with trend
     in_ts_notrend = np.random.normal(0, 1, 101) #test of timeseries with trend
@@ -162,7 +162,7 @@ def test_kendalltrend():
 
 def test_interp():
     import pandas as pd
-    from earlywarningsignals import interp
+    from earlywarningsignals.earlywarningsignals import interp
 
     # Generate the data
     fun = lambda x: np.cos(-x**2/9.0)
@@ -171,57 +171,55 @@ def test_interp():
 
     # Write in the form of a data frame
     df = pd.DataFrame(y, index = x)
-    
+
     # Interpolate
     x_n = np.linspace(0, 10, 100)
     df_n = interp(df, x_n, method = 'cubic')
 
     # Extract interpolated ys
     y_n = df_n.values.T
-    
+
     # Check equality under tolerance
     absTol = 0.05
     absErrs = np.abs(y_n - fun(x_n))
     assert(absErrs.max() < absTol)
-    
+
 def test_detrend():
-    from earlywarningsignals import detrend
+    from earlywarningsignals.earlywarningsignals import detrend
     from pandas.util.testing import assert_frame_equal
-    
+
     # test 1: linear trend
     # Input and output timeseries with linear trend
     in_lin_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_lin_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     in_lin_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_lin_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
-    # do test 
+    # do test
     ts= pd.DataFrame({'ts1': in_lin_trend1, 'ts2': in_lin_trend2})
     output_lin= pd.DataFrame({'ts1': out_lin_trend1, 'ts2': out_lin_trend2})
     ts_trend, ts_resid = detrend(ts, detrending='linear')
     assert_frame_equal(ts_resid, output_lin, check_less_precise=2)
-    
+
     # test 2: gaussian trend
     # @ Bregje: input and output timeseries here
     in_gaus_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_gaus_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     in_gaus_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_gaus_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
-    
+
     # test 3: loess trend
     # @ Bregje: input and output timeseries here
     in_loess_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_loess_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     in_loess_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_loess_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
-    
+
     # test 4: first_difference
     # @ Bregje: input and output timeseries here
     in_fd_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_fd_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     in_fd_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_fd_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
-    
+
     # test 5: test whether ts - ts_trend = ts_resid
     assert_frame_equal(ts - ts_trend, ts_resid)
-    
-
