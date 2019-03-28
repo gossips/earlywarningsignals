@@ -19,3 +19,9 @@ code/.cache/v/cache/lastfailed
 # Coverage reports #
 ############################
 .coverage
+
+# Builds and releases #
+############################
+*egg*
+*dist*
+*build*
