@@ -188,32 +188,40 @@ def test_detrend():
     from earlywarningsignals import detrend
     from pandas.util.testing import assert_frame_equal
     
-    # Test 1: linear trend
+    # test 1: linear trend
+    # Input and output timeseries with linear trend
+    in_lin_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_lin_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_lin_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_lin_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    # do test 
+    ts= pd.DataFrame({'ts1': in_lin_trend1, 'ts2': in_lin_trend2})
+    output_lin= pd.DataFrame({'ts1': out_lin_trend1, 'ts2': out_lin_trend2})
+    ts_trend, ts_resid = detrend(ts, detrending='linear')
+    assert_frame_equal(ts_resid, output_lin, check_less_precise=2)
     
-    #import data generated with R Toolbox
-    in_ts = pd.read_csv("ts_test_detrend/x1.txt", sep=" ", header=None) 
-    in_ts.columns = ["original"]
-    in_ts.index=np.arange(1,10002)
-    in_ts1= in_ts[0:101]
+    # test 2: gaussian trend
+    # @ Bregje: input and output timeseries here
+    in_gaus_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_gaus_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_gaus_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_gaus_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     
-    detrend_methods= ['gaussian', 'loess', 'linear']
+    # test 3: loess trend
+    # @ Bregje: input and output timeseries here
+    in_loess_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_loess_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_loess_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_loess_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     
-    for method in detrend_methods:  
-        out_detrend = pd.read_csv('ts_test_detrend/x1_' + method +'.txt', sep='\t')
-        out_detrend=out_detrend.drop(['timeindex'], axis=1)
-        out_detrend=out_detrend.join(in_ts1)
-        out_detrend.head()
+    # test 4: first_difference
+    # @ Bregje: input and output timeseries here
+    in_fd_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_fd_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
+    in_fd_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
+    out_fd_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     
-        # Test function
-        ts= pd.DataFrame({'ts1': out_detrend['original'], 'ts2':out_detrend['original']})
-        output_detrend= pd.DataFrame({'ts1': out_detrend['smoothed'], 'ts2':out_detrend['smoothed']})  
-        ts_trend, ts_resid = detrend(ts, detrending= method)
-        
-        # test whether R output is same as Python output
-        print(method)
-        assert_frame_equal(ts_trend, output_detrend, check_less_precise=2)
-        
-        # test whether ts - ts_trend = ts_resid
-        assert_frame_equal(ts - ts_trend, ts_resid)
+    # test 5: test whether ts - ts_trend = ts_resid
+    assert_frame_equal(ts - ts_trend, ts_resid)
     
 
