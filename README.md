@@ -6,3 +6,11 @@ This project contains the development version of the Early Warning Signals for C
 
 The project is based on:
 * The CRAN R package of Vasilis Dakos en Leo Lahti.
+
+## Installation
+
+```
+>>> git clone https://github.com/PabRod/earlywarningsignals.git
+
+>>> python setup.py install --user
+```
