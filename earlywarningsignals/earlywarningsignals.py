@@ -265,7 +265,8 @@ def loess(y, degree=None, span=None):
 
 def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
         kurtosis=False, CV=False,plots=True):
-         """Function that calculates early warning signals
+    
+    """Function that calculates early warning signals
 
     :param timeseries: Original timeseries (column for every variable)
     :param window_size: Set to size of rolling window, default setting does not use a rolling window
