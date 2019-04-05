@@ -1,4 +1,5 @@
-[![Build Status](https://api.travis-ci.com/PabRod/earlywarningsignals.svg?token=Fq3EdNLAbvvXT6TczBaZ&branch=master)](https://travis-ci.com/PabRod/earlywarningsignals)
+[![Build Status](https://api.travis-ci.org/gossips/earlywarningsignals.svg?branch=master)](https://travis-ci.org/gossips/earlywarningsignals)
+[![Codecov](https://codecov.io/gh/gossips/earlywarningsignals/graph/badge.svg)](https://codecov.io/gh/gossips/earlywarningsignals)
 
 # earlywarnings - Python
 
