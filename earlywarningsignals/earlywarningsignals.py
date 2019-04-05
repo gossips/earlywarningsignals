@@ -264,7 +264,7 @@ def loess(y, degree=None, span=None):
 # =============================================================================
 
 def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
-        kurtosis=False, CV=False,plots=True):
+        kurtosis_ews=False, CV=False,plots=True):
     
     """Function that calculates early warning signals
 
@@ -292,8 +292,8 @@ def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
     e=lambda x: np.std(x[:])/np.mean(x[:])
     
     functions=[a,b,c,d,e]
-    indicators=[autocorrelation,variance,skewness,kurtosis,CV]
-    strindicators=['autocorrelation','variance','skewness','kurtosis','CV']
+    indicators=[autocorrelation,variance,skewness,kurtosis_ews,CV]
+    strindicators=['autocorrelation','variance','skewness','kurtosis_ews','CV']
     idx=np.where(indicators)[0]
     strindicators=[strindicators[i] for i in idx] #Only calculate the selectd indicators
     
