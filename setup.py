@@ -14,9 +14,9 @@ setup(
     version='0.1.0',
     description='Toy package',
     long_description=readme,
-    author='Our names here',
-    author_email='our@gmail.com',
-    url='https://github.com/PabRod/phdtools',
+    author='Ingrid van de Leemput',
+    author_email='ingrid.vandeleemput@wur.nl',
+    url='https://github.com/gossips/earlywarningsignals.git',
     license=license,
     packages=find_packages(exclude=('tests', 'docs', 'data', 'R', 'vignettes'))
 )
