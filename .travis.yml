@@ -12,9 +12,6 @@ python:
 install:
   - pip install -r requirements.txt
 
-env:
- - CODECOV_TOKEN=58f0ce42-0da3-4194-a31b-c50bf432e910
-
 script:
   - py.test -p no:warnings --cov
 
