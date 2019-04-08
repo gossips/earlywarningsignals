@@ -42,16 +42,16 @@ def test_EWS():
     result=EWS(input_ts,autocorrelation=True,variance=True,skewness=True,
                kurtosis_ews=True,CV=True,plots=False)
     result=result.dropna()
-    assert(result.autocorrelation.iloc[0] == output_autocorrelation[0])
-    assert(result.autocorrelation.iloc[1] == output_autocorrelation[1])
-    assert(result.variance.iloc[0] == output_variance[0])
-    assert(result.variance.iloc[1] == output_variance[1])
-    assert(result.skewness.iloc[0] == output_skewness[0])
-    assert(result.skewness.iloc[1] == output_skewness[1])
-    assert(result.kurtosis_ews.iloc[0] == output_kurtosis[0])
-    assert(result.kurtosis_ews.iloc[1] == output_kurtosis[1])
-    assert(result.CV.iloc[0] == output_CV[0])
-    assert(result.CV.iloc[1] == output_CV[1])
+    assert(float(result.autocorrelation.iloc[0]) == output_autocorrelation[0])
+    assert(float(result.autocorrelation.iloc[1]) == output_autocorrelation[1])
+    assert(float(result.variance.iloc[0]) == output_variance[0])
+    assert(float(result.variance.iloc[1]) == output_variance[1])
+    assert(float(result.skewness.iloc[0]) == output_skewness[0])
+    assert(float(result.skewness.iloc[1]) == output_skewness[1])
+    assert(float(result.kurtosis_ews.iloc[0]) == output_kurtosis[0])
+    assert(float(result.kurtosis_ews.iloc[1]) == output_kurtosis[1])
+    assert(float(result.CV.iloc[0]) == output_CV[0])
+    assert(float(result.CV.iloc[1]) == output_CV[1])
 
 
 def test_isUniformSpacing():
