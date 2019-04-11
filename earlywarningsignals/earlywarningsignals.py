@@ -178,90 +178,7 @@ def loess(y, degree=None, span=None):
         
     return p
 
-# =============================================================================
-# def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
-#         kurtosis=False, CV=False,plots=True):
-# 
-#     """Function that calculates early warning signals
-# 
-#     :param timeseries: Original timeseries (column for every variable)
-#     :param window_size: Set to size of rolling window, default setting does not use a rolling window
-#     :param autocorrelation: Set to True if autocorrelation is required in output
-#     :param variance: Set to True if variance is required in output
-#     :param skewness: Set to True if skewness is required in output
-#     :param kurtosis: Set to True if kurtosis is required (Fishers definition used,
-#     so it is zero for a normal distribution)
-#     :param CV: Set to True if coefficient of variation is required
-#     :return: dict with the chosen output and for every output an array with the
-#     values for each variable (every column).
-#     """
-# 
-#     timeseries=pd.DataFrame.as_matrix(ts)
-#     nr_vars=len(timeseries[0,:])
-# 
-#     result={}
-# 
-#     if window_size == None:
-#         libs = 1
-#         window_size = len(timeseries[:,0])
-#     else:
-#         libs = len(timeseries[:,0]) - window_size + 1
-# 
-#     if autocorrelation == True:
-#         AC=np.zeros((libs,nr_vars))
-#     if variance == True:
-#         Var=np.zeros((libs,nr_vars))
-#     if skewness == True:
-#         Skews=np.zeros((libs,nr_vars))
-#     if kurtosis == True:
-#         Kurt=np.zeros((libs,nr_vars))
-#     if CV == True:
-#         CVs=np.zeros((libs,nr_vars))
-# 
-#     for j in range(libs):
-#         lib_ts=timeseries[j:j+window_size,:]
-# 
-#         for i in range(nr_vars):
-# 
-#             if autocorrelation == True:
-#                 AC[j,i]=np.corrcoef(lib_ts[1:,i],lib_ts[:-1,i])[1,0]
-#                 result.update({'autocorrelation' : AC})
-# 
-#             if variance == True:
-#                 Var[j,i]=np.var(lib_ts[:,i])
-#                 result.update({'variance' : Var})
-# 
-#             if skewness == True:
-#                 Skews[j,i]=scipy.stats.skew(lib_ts[:,i])
-#                 result.update({'skewness' : Skews})
-# 
-#             if kurtosis == True:
-#                 Kurt[j,i]=scipy.stats.kurtosis(lib_ts[:,i])
-#                 result.update({'kurtosis' : Kurt})
-# 
-#             if CV == True:
-#                 CVs[j,i]=np.std(lib_ts[:,i])/np.mean(lib_ts[:,i])
-#                 result.update({'CV' : CVs})
-#     if plots == True:        
-#         if autocorrelation == True:
-#             plt.plot(result['autocorrelation'])
-#             plt.title('autocorrelation')
-#             plt.show()
-#         if variance == True:
-#             plt.plot(result['variance'])
-#             plt.show()
-#         if skewness == True:
-#             plt.plot(result['skewness'])
-#             plt.show()
-#         if kurtosis == True:
-#             plt.plot(result['kurtosis'])
-#             plt.show()
-#         if CV == True:
-#             plt.plot(result['CV'])
-#             plt.show()
-#         
-#     return result
-# =============================================================================
+
 
 def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
         kurtosis_ews=False, CV=False,plots=True):
@@ -313,21 +230,6 @@ def EWS(ts,window_size=None,autocorrelation=False,variance=False,skewness=False,
     return result
 
 
-def EWS_rolling_window(df,winsize=50):
-
-    """Use a rolling window on which EWS are calculated
-
-    :param df: dataframe with original timeseries
-    :param winsize:  the size of the rolling window expressed as percentage of the timeseries length (must be numeric between 0 and 100). Default is 50\%.
-    :return: dataframe with result
-
-    Created by Ingrid van de Leemput
-    """
-
-    mw=round(len(df.index) * winsize/100) # length moving window
-    df.rolling(window=mw).apply(func=EWS)
-
-    #How to do this nicely? I think we should plug this into the EWS function!
 
 def kendalltrend(ts):
     """Calculates the Kendall trend statistic for a EW indicators
