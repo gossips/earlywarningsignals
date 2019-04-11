@@ -11,7 +11,7 @@ The project is based on:
 ## Installation
 
 ```
->>> git clone https://github.com/PabRod/earlywarningsignals.git
+>>> git clone https://github.com/gossips/earlywarningsignals
 
 >>> python setup.py install --user
 ```
