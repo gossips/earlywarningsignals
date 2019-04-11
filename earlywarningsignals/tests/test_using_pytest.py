@@ -30,7 +30,7 @@ def test_logtransform():
 
 def test_EWS():
     from earlywarningsignals.earlywarningsignals import EWS
-    
+
     #Test 1. Trying a known value
     np_input_ts=pd.DataFrame(np.array([[1,6],[3,5],[4,4],[6,1]]),columns=['a','b'])
     input_ts=pd.DataFrame(data=np_input_ts)
@@ -42,16 +42,18 @@ def test_EWS():
     result=EWS(input_ts,autocorrelation=True,variance=True,skewness=True,
                kurtosis_ews=True,CV=True,plots=False)
     result=result.dropna()
-    assert(float(result.autocorrelation.iloc[0]) == output_autocorrelation[0])
-    assert(float(result.autocorrelation.iloc[1]) == output_autocorrelation[1])
-    assert(float(result.variance.iloc[0]) == output_variance[0])
-    assert(float(result.variance.iloc[1]) == output_variance[1])
-    assert(float(result.skewness.iloc[0]) == output_skewness[0])
-    assert(float(result.skewness.iloc[1]) == output_skewness[1])
-    assert(float(result.kurtosis_ews.iloc[0]) == output_kurtosis[0])
-    assert(float(result.kurtosis_ews.iloc[1]) == output_kurtosis[1])
-    assert(float(result.CV.iloc[0]) == output_CV[0])
-    assert(float(result.CV.iloc[1]) == output_CV[1])
+
+    tol = 1e-6
+    assert(float(result.autocorrelation.iloc[0]) == pt.approx(output_autocorrelation[0], tol))
+    assert(float(result.autocorrelation.iloc[1]) == pt.approx(output_autocorrelation[1], tol))
+    assert(float(result.variance.iloc[0]) == pt.approx(output_variance[0], tol))
+    assert(float(result.variance.iloc[1]) == pt.approx(output_variance[1], tol))
+    assert(float(result.skewness.iloc[0]) == pt.approx(output_skewness[0], tol))
+    assert(float(result.skewness.iloc[1]) == pt.approx(output_skewness[1], tol))
+    assert(float(result.kurtosis_ews.iloc[0]) == pt.approx(output_kurtosis[0], tol))
+    assert(float(result.kurtosis_ews.iloc[1]) == pt.approx(output_kurtosis[1], tol))
+    assert(float(result.CV.iloc[0]) == pt.approx(output_CV[0], tol))
+    assert(float(result.CV.iloc[1]) == pt.approx(output_CV[1], tol))
 
 
 def test_isUniformSpacing():
