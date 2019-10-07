@@ -133,31 +133,6 @@ def test_check_timeseries_customtimes():
     assert(np.size(indices) == N)
     assert(np.size(ts) == N)
 
-def test_timeseries():
-    from earlywarningsignals.earlywarningsignals import check_time_series
-
-    # Test 1: Trying a known value
-    input_1a = np.arange(10)*2
-    input_1b = np.arange(10)
-    input_2a = np.array([[1,6],[3,5],[4,4],[6,1]])
-    input_2aa = np.array([['a','b'],['b','x'],['l','i'],['g','z']])
-    input_2b = np.arange(4)
-    input_2bb = np.random.randint(low=0, high=14, size=(4,1))
-    input_3a = pd.DataFrame(input_1a)
-    input_3b = pd.DataFrame(input_1b)
-    input_4a = pd.DataFrame(input_2a)
-    input_4b = pd.DataFrame(input_2b)
-    [output_1a, output_1b] = check_time_series(input_1a)
-    #still have to write asserts
-    assert(isinstance(output_1a, pd.DataFrame))
-
-    #Check if evenly spaced check works
-    with pt.raises(ValueError):
-        check_time_series(input_2a, input_2bb)
-
-    #Check if timeseries and timeindex have same length
-    with pt.raises(ValueError):
-        check_time_series(input_3a, input_4b)
 
 def test_kendalltrend():
     from earlywarningsignals.earlywarningsignals import kendalltrend
@@ -210,21 +185,18 @@ def test_detrend():
     assert_frame_equal(ts_resid, output_lin, check_less_precise=2)
 
     # test 2: gaussian trend
-    # @ Bregje: input and output timeseries here
     in_gaus_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_gaus_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     in_gaus_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_gaus_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
 
     # test 3: loess trend
-    # @ Bregje: input and output timeseries here
     in_loess_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_loess_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     in_loess_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_loess_trend2 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
 
     # test 4: first_difference
-    # @ Bregje: input and output timeseries here
     in_fd_trend1 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
     out_fd_trend1 = np.array([0.0750, 0.0429, 0.2107, -0.3214, -0.2536, 0.2143, -0.2179, 0.2500])
     in_fd_trend2 = np.array([1.0, 1.3, 1.8, 1.6, 2.0, 2.8, 2.7, 3.5])
